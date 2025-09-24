@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/plashOnboardFragment">
+
+    <!-- Splash Onboard -->
+    <fragment
+        android:id="@+id/plashOnboardFragment"
+        android:name="com.example.appmanagement.ui.splash.PlashOnboardFragment"
+        android:label="Splash">
+        <action
+            android:id="@+id/action_plash_to_onboard"
+            app:destination="@id/onboardFragment"
+            app:popUpTo="@id/plashOnboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Onboard -->
+    <fragment
+        android:id="@+id/onboardFragment"
+        android:name="com.example.appmanagement.ui.onboard.OnboardFragment"
+        android:label="Onboard">
+        <action
+            android:id="@+id/action_onboard_to_signEmail"
+            app:destination="@id/signEmailFragment" />
+    </fragment>
+
+    <!-- Đăng nhập -->
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.example.appmanagement.ui.login.SignInFragment"
+        android:label="SignIn">
+        <action
+            android:id="@+id/action_signIn_to_createWork"
+            app:destination="@id/createWorkFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Nhập email / quên mật khẩu -->
+    <fragment
+        android:id="@+id/signEmailFragment"
+        android:name="com.example.appmanagement.ui.login.SignEmailFragment"
+        android:label="SignEmail">
+        <action
+            android:id="@+id/action_signEmail_to_signIn"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_signEmail_to_signUp"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+
+    <!-- Đăng ký -->
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.example.appmanagement.ui.login.SignUpFragment"
+        android:label="SignUp">
+        <action
+            android:id="@+id/action_signUp_to_createWork"
+            app:destination="@id/createWorkFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Màn chính sau đăng nhập -->
+    <fragment
+        android:id="@+id/createWorkFragment"
+        android:name="com.example.appmanagement.ui.home.CreateWorkFragment"
+        android:label="CreateWork" />
+</navigation>
