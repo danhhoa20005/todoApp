@@ -49,8 +49,9 @@
 
 ## 📂 Các tài liệu bắt buộc đi kèm
 
-* **File Figma giao diện**: thiết kế UI toàn bộ app.
-* **Biểu đồ UML Database Design**: mô tả thiết kế dữ liệu.
+* **File Figma giao diện**: thiết kế UI toàn bộ app. https://www.figma.com/design/9EBjWWFK74uhYiVYMKRCgW/Kijiji-Hub-App-iOS-UI-Kit--Community-?node-id=0-1&p=f&t=9prVOJ9xkm0HmO6L-0
+* **Biểu đồ UML Database Design**: mô tả thiết kế dữ liệu.https://dbdiagram.io/d/CSDL-todoApp-68d56d10d2b621e422edda71<img width="1271" height="612" alt="CSDL todoApp" src="https://github.com/user-attachments/assets/85830943-640c-476b-8e23-c0702e8e62c7" />
+
 * **Entity Relationship Diagram (ERD)**: biểu diễn quan hệ giữa các bảng trong CSDL.
 * **Activity Diagram**: mô tả luồng hoạt động của ứng dụng.
 * **Class Diagram**: mô tả mối quan hệ giữa các lớp trong mô hình MVVM.
