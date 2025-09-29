@@ -10,7 +10,7 @@ import com.example.appmanagement.data.entity.User
 // RoomDatabase: điểm vào của Room, cung cấp các DAO
 @Database(
     entities = [User::class], // hiện tại chỉ có User
-    version = 1,
+    version = 2,
     exportSchema = false   // tránh warning nếu chưa config schema
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,7 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "todo.db" // tên file DB
                 )
-                    .fallbackToDestructiveMigration() // dev nhanh, production nên viết Migration
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

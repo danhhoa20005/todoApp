@@ -86,7 +86,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutPassword"
         android:layout_width="0dp"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         app:endIconMode="password_toggle"
         app:endIconTint="@android:color/white"
         app:boxBackgroundMode="none"
@@ -99,8 +99,9 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Password"
+            app:hintEnabled="false"
             android:inputType="textPassword"
             android:textColor="@android:color/white"
             android:textColorHint="#40FFFFFF"

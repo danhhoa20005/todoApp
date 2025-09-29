@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/plashOnboardFragment">
 
@@ -14,6 +15,9 @@
             app:destination="@id/onboardFragment"
             app:popUpTo="@id/plashOnboardFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_plashOnboardFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
 
     <!-- Onboard -->
@@ -32,10 +36,8 @@
         android:name="com.example.appmanagement.ui.login.SignInFragment"
         android:label="SignIn">
         <action
-            android:id="@+id/action_signIn_to_createWork"
-            app:destination="@id/createWorkFragment"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
+            android:id="@+id/action_signInFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
 
     <!-- Nhập email / quên mật khẩu -->
@@ -63,9 +65,41 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- Màn chính sau đăng nhập -->
+    <!-- Màn tạo thông tin sau đăng nhập -->
     <fragment
         android:id="@+id/createWorkFragment"
         android:name="com.example.appmanagement.ui.home.CreateWorkFragment"
-        android:label="CreateWork" />
+        android:label="CreateWork" >
+        <action
+            android:id="@+id/action_createWorkFragment_to_onboardFragment"
+            app:destination="@id/onboardFragment" />
+        <action
+            android:id="@+id/action_createWorkFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_createWorkFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+    <!-- Home -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.appmanagement.ui.home.HomeFragment"
+        android:label="Home" >
+
+        <action
+            android:id="@+id/action_homeFragment_to_signInFragment"
+            app:destination="@id/signInFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_addFragment"
+            app:destination="@id/addFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addFragment"
+        android:name="com.example.appmanagement.BlankFragment"
+        android:label="fragment_add"
+        tools:layout="@layout/fragment_add" />
+
 </navigation>

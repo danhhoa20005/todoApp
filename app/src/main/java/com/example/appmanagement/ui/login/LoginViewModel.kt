@@ -12,40 +12,64 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel cho luồng đăng nhập/đăng ký.
- * - Giữ logic gọi Repository
- * - Expose LiveData cho UI quan sát
+ * - Giữ logic gọi Repository (AccountRepository)
+ * - Expose LiveData cho UI quan sát và phản ứng (MVVM)
  */
 class LoginViewModel(app: Application) : AndroidViewModel(app) {
 
-    // Tầng data: khởi tạo bằng Application để có Context an toàn
-    private val db by lazy { AppDatabase.getInstance(app) }   // ✅ đổi sang getInstance(...)
+    // ---------------------------
+    // Khởi tạo tầng data
+    // ---------------------------
+
+
+    private val db by lazy { AppDatabase.getInstance(app) }
+
+    // Quản lý trạng thái đăng nhập + thông tin user bằng DataStore
     private val prefs by lazy { UserPreferences(app) }
+
+    // Repository trung gian giữa ViewModel ↔ DAO + DataStore
     private val repo by lazy { AccountRepository(db.userDao(), prefs) }
 
-    // Kết quả đăng nhập: true=thành công, false=thất bại
+    // ---------------------------
+    // LiveData cho UI quan sát
+    // ---------------------------
+
+    // Kết quả đăng nhập: true = thành công, false = thất bại
     private val _loginResult = MutableLiveData<Boolean>()
     val loginResult: LiveData<Boolean> = _loginResult
 
-    // Kết quả đăng ký: "ok" | "email_exists" | "invalid" | "failed"
+    // Kết quả đăng ký:
+    // "ok"           → thành công
+    // "email_exists" → trùng email
+    // "invalid"      → input không hợp lệ
+    // "failed"       → lỗi khác (DB, hệ thống…)
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> = _registerResult
+
+    // ---------------------------
+    // Hành động từ UI gọi xuống
+    // ---------------------------
 
     /** Đăng nhập */
     fun login(email: String, pass: String) = viewModelScope.launch {
         val ok = repo.login(email, pass)
+        // postValue để gửi kết quả sang UI (có thể quan sát trong Fragment/Activity)
         _loginResult.postValue(ok)
     }
 
     /** Đăng ký */
     fun register(name: String, email: String, pass: String) = viewModelScope.launch {
         try {
-            repo.register(name, email, pass)
+            repo.register(name, email, pass)   // gọi xuống Repository
             _registerResult.postValue("ok")
-        } catch (e: IllegalStateException) {           // repository ném khi email đã tồn tại
+        } catch (e: IllegalStateException) {
+            // Repo ném khi email đã tồn tại
             _registerResult.postValue(e.message ?: "email_exists")
-        } catch (_: IllegalArgumentException) {        // tham số thiếu/không hợp lệ
+        } catch (_: IllegalArgumentException) {
+            // Repo ném khi input thiếu hoặc không hợp lệ
             _registerResult.postValue("invalid")
-        } catch (_: Throwable) {                       // lỗi khác
+        } catch (_: Throwable) {
+            // Các lỗi khác (DB, hệ thống…)
             _registerResult.postValue("failed")
         }
     }

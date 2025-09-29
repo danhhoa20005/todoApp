@@ -18,7 +18,13 @@ data class User(
     val email: String,                // email đăng nhập (unique)
 
     @ColumnInfo(name = "password_hash")
-    val passwordHash: String,         // mật khẩu sau khi băm (không lưu plain-text)
+    val passwordHash: String,         // mật khẩu sau khi băm
+
+    @ColumnInfo(name = "birth_date")
+    val birthDate: String,            // ngày sinh (ví dụ: "02/05/2005")
+
+    @ColumnInfo(name = "avatar_url")
+    val avatarUrl: String?,           // đường dẫn hoặc URL ảnh đại diện (nullable)
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis() // thời điểm tạo tài khoản

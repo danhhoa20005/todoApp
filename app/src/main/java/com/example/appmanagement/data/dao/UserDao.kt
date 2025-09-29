@@ -3,23 +3,31 @@ package com.example.appmanagement.data.dao
 import androidx.room.*
 import com.example.appmanagement.data.entity.User
 
-
-@Dao // DAO = nơi định nghĩa các thao tác CSDL (SQL) cho bảng User
+// DAO cho bảng users
+@Dao
 interface UserDao {
 
+    // Thêm user mới, trả về id
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(user: User  ): Long
-    // chèn người dùng mới; ABORT: nếu email trùng (do unique index) → ném lỗi
+    suspend fun insert(user: User): Long
 
+    // Lấy user theo email
     @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     suspend fun getByEmail(email: String): User?
-    // lấy 1 user theo email (phục vụ đăng nhập/đăng ký)
 
+    // Lấy user theo id
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): User?
+
+    // Kiểm tra email đã tồn tại
     @Query("SELECT EXISTS(SELECT 1 FROM users WHERE email = :email)")
     suspend fun existsEmail(email: String): Boolean
-    // kiểm tra email đã tồn tại chưa (đăng ký)
 
+    // Cập nhật user
+    @Update
+    suspend fun update(user: User)
+
+    // Xoá user
     @Delete
     suspend fun delete(user: User)
-    // xoá user (ít dùng cho đăng nhập, để sẵn)
 }

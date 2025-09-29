@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt") // cần cho Room compiler
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,4 +66,23 @@ dependencies {
     val navVersion = "2.8.1" // hoặc bản mới nhất bạn dùng
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
+
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+// Google Sign-In
+    implementation("com.facebook.android:facebook-login:16.3.0")
+// Facebook Login
+    implementation("com.google.android.material:material:1.12.0")
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
+
 }

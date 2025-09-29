@@ -32,7 +32,7 @@ class PlashOnboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(600) // hiệu ứng splash nhỏ
+            delay(1200) // hiệu ứng splash nhỏ
 
             val prefs = UserPreferences(requireContext().applicationContext)
             val loggedIn = prefs.isLoggedInFlow.first()
@@ -41,7 +41,8 @@ class PlashOnboardFragment : Fragment() {
 
             if (loggedIn) {
                 // Nếu muốn sang màn chính thì navigate thẳng tới createWorkFragment
-                findNavController().navigate(R.id.createWorkFragment)
+                //findNavController().navigate(R.id.createWorkFragment)
+                findNavController().navigate(R.id.action_plash_to_onboard)
             } else {
                 // Nếu chưa đăng nhập thì sang Onboard (đúng với action trong nav_graph)
                 findNavController().navigate(R.id.action_plash_to_onboard)

@@ -55,7 +55,7 @@ class SignInFragment : Fragment() {
         vm.loginResult.observe(viewLifecycleOwner) { ok ->
             if (ok == true) {
                 // Đúng nav_graph: SignIn → CreateWork
-                findNavController().navigate(R.id.action_signIn_to_createWork)
+                findNavController().navigate(R.id.action_signInFragment_to_homeFragment)
             } else {
                 Toast.makeText(requireContext(), "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show()
             }
