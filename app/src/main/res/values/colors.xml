@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Nền app -->
+    <color name="bg_dark">#181A20</color>
+    <color name="card_dark">#1F222A</color>
+
+    <!-- Text -->
+
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#B0B3B8</color>
+    <color name="text_highlight">#FFD700</color> <!-- vàng cho số -->
+
+    <!-- Tab -->
+    <color name="tab_inactive">#808080</color>
+    <color name="tab_active">#FFFFFF</color>
+    <color name="tab_blue">#2D7FF9</color>
+
+    <!-- Progress Gradient -->
+    <color name="gradient_start">#5AE4A7</color> <!-- xanh ngọc -->
+    <color name="gradient_end">#BC6CFF</color>   <!-- tím hồng -->
+
+    <!-- Nút + -->
+    <color name="fab_blue">#2D7FF9</color>
+
+    <!-- Các màu accent -->
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
 </resources>

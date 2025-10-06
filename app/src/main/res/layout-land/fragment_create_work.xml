@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#11131A">
+
+    <!-- Thanh tiêu đề -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/thanh_tieude"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Quay lại"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_tieude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Workspace"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            app:layout_constraintStart_toEndOf="@id/btn_back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="12dp"/>
+
+        <ImageButton
+            android:id="@+id/btn_profile"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Hồ sơ"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Thẻ nội dung chính -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/the_noi_dung"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="#161A22"
+        app:strokeColor="#2A3140"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/thanh_tieude"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <!-- Logo -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/vong_logo"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                app:cardCornerRadius="36dp"
+                app:cardBackgroundColor="#6F5CF1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/img_logo"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_gallery"/>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tv_ten_ws"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Stuart’s Workspace"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                app:layout_constraintTop_toBottomOf="@id/vong_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="12dp"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/tv_goi_y_logo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Chạm vào logo để tải ảnh mới"
+                android:textColor="#7F8A9E"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_ten_ws"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:gravity="center"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Nhập tên đăng nhập -->
+            <TextView
+                android:id="@+id/tv_user_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TÊN ĐĂNG NHẬP"
+                android:textAllCaps="true"
+                android:textColor="#6C7688"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@id/tv_goi_y_logo"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_username"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:boxStrokeColor="#2A3140"
+                app:boxBackgroundColor="#0F1218"
+                app:hintEnabled="false"
+                app:layout_constraintTop_toBottomOf="@id/tv_user_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edt_ten_dang_nhap"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Tên đăng nhập"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#61708B"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Ngày tháng năm sinh -->
+            <TextView
+                android:id="@+id/tv_dob_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NGÀY THÁNG NĂM SINH"
+                android:textAllCaps="true"
+                android:textColor="#6C7688"
+                android:textSize="10sp"
+                app:layout_constraintTop_toBottomOf="@id/til_username"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="20dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_ngay_sinh"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:boxStrokeColor="#2A3140"
+                app:boxBackgroundColor="#0F1218"
+                app:endIconMode="none"
+                app:layout_constraintTop_toBottomOf="@id/tv_dob_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btn_chon_ngay"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edt_ngay_sinh"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="dd/MM/yyyy"
+                    android:focusable="false"
+                    android:inputType="none"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#61708B"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Nút dưới cùng -->
+
+            <ImageButton
+                android:id="@+id/btn_chon_ngay"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Chọn ngày"
+                app:layout_constraintBottom_toBottomOf="@id/til_ngay_sinh"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/til_ngay_sinh"
+                app:layout_constraintVertical_bias="1.0" />
+
+            <TextView
+                android:id="@+id/btn_bo_qua"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Skip"
+                android:textColor="#7F8A9E"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_tiep"
+                android:layout_width="96dp"
+                android:layout_height="44dp"
+                android:text="Next"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="22dp"
+                app:backgroundTint="#3957FF"
+                android:textColor="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
