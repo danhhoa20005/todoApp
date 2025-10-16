@@ -16,7 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-import com.example.appmanagement.utils.AppGlobals
+import com.example.appmanagement.util.AppGlobals
 
 class PlashOnboardFragment : Fragment() {
 

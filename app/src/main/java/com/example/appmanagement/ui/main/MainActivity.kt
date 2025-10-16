@@ -40,7 +40,11 @@ class MainActivity : AppCompatActivity() {
             R.id.addFragment,
             R.id.listFragment,
             R.id.calendarFragment,
-            R.id.clockFragment
+            R.id.clockFragment,
+            R.id.doneFragment,
+            R.id.todayFragment,
+            R.id.dateDetailFragment,
+            R.id.editFragment
         )
 
         // Gắn NavigationController cho BottomNavigationView

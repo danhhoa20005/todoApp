@@ -3,26 +3,14 @@ package com.example.appmanagement.data.repo
 import com.example.appmanagement.data.dao.TaskDao
 import com.example.appmanagement.data.entity.Task
 
-// Repository trung gian giữa ViewModel và Room
-// Gói toàn bộ thao tác CRUD cho Task, giúp tách biệt logic DB khỏi UI
 class TaskRepository(private val dao: TaskDao) {
 
-    // Lấy danh sách task theo user
-    fun all(userId: Long) = dao.getByUser(userId)
-
-    // Lấy task chưa hoàn thành
-    fun uncompleted(userId: Long) = dao.getUncompleted(userId)
-
-    // Lấy task đã hoàn thành
-    fun completed(userId: Long) = dao.getCompleted(userId)
-
-    // Lấy task theo ngày cụ thể
+    fun all(userId: Long) = dao.getByUserOrdered(userId)
+    fun uncompleted(userId: Long) = dao.getUncompletedOrdered(userId)
+    fun completed(userId: Long) = dao.getCompletedOrdered(userId)
     fun byDate(userId: Long, date: String) = dao.getByDate(userId, date)
-
-    // Lấy task theo id
     fun byId(id: Long) = dao.getByIdLive(id)
 
-    // Thêm task mới
     suspend fun add(
         userId: Long,
         title: String,
@@ -37,16 +25,15 @@ class TaskRepository(private val dao: TaskDao) {
             description = description.trim(),
             taskDate = taskDate,
             startTime = startTime,
-            endTime = endTime
+            endTime = endTime,
+            orderIndex = Int.MAX_VALUE
         )
     )
 
-    // Cập nhật task
     suspend fun update(task: Task) = dao.update(task)
-
-    // Xoá task
     suspend fun delete(task: Task) = dao.delete(task)
-
-    // Đổi trạng thái hoàn thành ↔ chưa hoàn thành
     suspend fun toggle(task: Task) = dao.setCompleted(task.id, !task.isCompleted)
+
+    suspend fun updateOrderIndex(id: Long, index: Int) = dao.updateOrderIndex(id, index)
+    suspend fun updateOrderMany(pairs: List<Pair<Long, Int>>) = dao.updateOrderMany(pairs)
 }

@@ -12,7 +12,7 @@
     <!-- Tiêu đề -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Task"
         android:textColor="@android:color/white"
@@ -21,14 +21,14 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginTop="24dp"
-        android:paddingTop="16dp"
+        android:paddingTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Mô tả phụ -->
     <TextView
         android:id="@+id/tvDesc"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Let's plan something new today ✨"
         android:textColor="#B3FFFFFF"

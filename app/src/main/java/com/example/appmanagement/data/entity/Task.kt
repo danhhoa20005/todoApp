@@ -24,6 +24,9 @@ data class Task(
     @ColumnInfo(name = "user_id")
     val userId: Long,
 
+    @ColumnInfo(name = "order_index")
+    val orderIndex: Int = 0,
+
     // Tiêu đề công việc
     @ColumnInfo(name = "title")
     val title: String,

@@ -4,29 +4,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
-import com.example.appmanagement.databinding.FragmentListBinding
+import com.example.appmanagement.databinding.FragmentTodayBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
-class ListFragment : Fragment() {
+class TodayFragment : Fragment() {
 
-    private var _binding: FragmentListBinding? = null
+    private var _binding: FragmentTodayBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var taskRepo: TaskRepository
+    private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    // thêm
+    // trạng thái kéo & animator gốc
     private var isDragging = false
     private var originalAnimator: RecyclerView.ItemAnimator? = null
 
@@ -34,7 +40,7 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListBinding.inflate(inflater, container, false)
+        _binding = FragmentTodayBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -48,8 +54,10 @@ class ListFragment : Fragment() {
 
         taskAdapter = TaskAdapter(
             onEditClick = { task ->
-                val action = ListFragmentDirections.actionListFragmentToEditFragment(task.id)
-                findNavController().navigate(action)
+                findNavController().navigate(
+                    R.id.editFragment,
+                    bundleOf("editId" to task.id)
+                )
             },
             onDeleteClick = { task ->
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) { taskRepo.delete(task) }
@@ -67,7 +75,7 @@ class ListFragment : Fragment() {
             originalAnimator = itemAnimator
         }
 
-        // ItemTouchHelper: kéo–thả, lưu order_index khi thả
+        // Kéo–thả sắp xếp + lưu order_index
         val touchCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
         ) {
@@ -77,12 +85,10 @@ class ListFragment : Fragment() {
                 super.onSelectedChanged(vh, actionState)
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     isDragging = true
-                    // tắt animator để tránh khựng khi kéo dài
-                    binding.rvTasks.itemAnimator = null
+                    binding.rvTasks.itemAnimator = null // tắt animator để mượt khi kéo
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
                     isDragging = false
-                    // bật lại animator sau khi thả
-                    binding.rvTasks.itemAnimator = originalAnimator
+                    binding.rvTasks.itemAnimator = originalAnimator // bật lại khi thả
                 }
             }
 
@@ -93,11 +99,10 @@ class ListFragment : Fragment() {
             ): Boolean {
                 val from = vh.bindingAdapterPosition
                 val to = target.bindingAdapterPosition
+                if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
 
-                // đổi thứ tự trong working list của adapter
-                taskAdapter.swapItems(from, to)
-                // báo UI trượt theo tay
-                taskAdapter.notifyItemMoved(from, to)
+                taskAdapter.swapItems(from, to)          // đổi trong working list
+                taskAdapter.notifyItemMoved(from, to)    // UI trượt theo tay
                 return true
             }
 
@@ -105,26 +110,30 @@ class ListFragment : Fragment() {
 
             override fun clearView(rv: RecyclerView, vh: RecyclerView.ViewHolder) {
                 super.clearView(rv, vh)
-                // Lưu thứ tự mới về DB từ working list
+                // lưu thứ tự mới từ working list
                 val pairs = taskAdapter.snapshotIdsWithIndex()
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepo.updateOrderMany(pairs)
                 }
             }
         }
-        val helper = ItemTouchHelper(touchCallback)
-        helper.attachToRecyclerView(binding.rvTasks)
-        taskAdapter.dragHelper = helper
+        ItemTouchHelper(touchCallback).attachToRecyclerView(binding.rvTasks)
 
-        // Quan sát danh sách đã sắp xếp từ Repo/DAO
+        val today = df.format(Calendar.getInstance().time)
+
+        // Lấy task NGÀY HÔM NAY theo user hiện tại
         viewLifecycleOwner.lifecycleScope.launch {
-            val user = withContext(Dispatchers.IO) { accountRepo.getCurrentUser() }
-            user?.let {
-                taskRepo.all(it.id).observe(viewLifecycleOwner) { tasks ->
-                    if (!isDragging) {
-                        // đồng bộ một lần mỗi khi DB thay đổi – KHÔNG gọi trong lúc kéo
-                        taskAdapter.submitDataOnce(tasks)
-                    }
+            val user = withContext(Dispatchers.IO) { accountRepo.getCurrentUser() } ?: return@launch
+            taskRepo.byDate(user.id, today).observe(viewLifecycleOwner) { tasks ->
+                // Sắp xếp: chưa hoàn thành trước → orderIndex tăng → id giảm
+                val sorted = tasks.sortedWith(
+                    compareBy<com.example.appmanagement.data.entity.Task> { it.isCompleted }
+                        .thenBy { it.orderIndex }
+                        .thenByDescending { it.id }
+                )
+                if (!isDragging) {
+                    taskAdapter.submitDataOnce(sorted)   // KHÔNG cập nhật khi đang kéo
+                    if (sorted.isNotEmpty()) binding.rvTasks.scrollToPosition(0)
                 }
             }
         }

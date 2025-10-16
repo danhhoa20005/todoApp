@@ -13,42 +13,63 @@ import kotlinx.coroutines.withContext
 
 class SignInViewModel(app: Application) : AndroidViewModel(app) {
 
-    // Tầng dữ liệu
-    private val db by lazy { AppDatabase.Companion.getInstance(app) }
-    private val repo by lazy { AccountRepository(db.userDao()) }
+    // Data layer
+    private val database by lazy { AppDatabase.getInstance(app) }
+    private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
-    // Kết quả đăng nhập: true = thành công, false = thất bại
+    // Login result: true = success, false = failure
     private val _loginResult = MutableLiveData<Boolean>()
     val loginResult: LiveData<Boolean> get() = _loginResult
 
-    // Kết quả đăng ký: "ok" | "email_exists" | "invalid" | "failed"
+    // Register result: "ok" | "email_exists" | "invalid" | "failed"
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> get() = _registerResult
 
-    fun login(email: String, matKhau: String) {
+    /** Login with email & password (repository verifies with BCrypt). */
+    fun login(email: String, password: String) {
+        val e = email.trim()
+        val p = password.trim()
+        if (e.isEmpty() || p.isEmpty()) {
+            _loginResult.value = false
+            return
+        }
+
         viewModelScope.launch {
-            val thanhCong = withContext(Dispatchers.IO) {
-                repo.login(email, matKhau)
+            val success = withContext(Dispatchers.IO) {
+                accountRepository.login(e, p)
             }
-            _loginResult.value = thanhCong
+            _loginResult.value = success
         }
     }
 
-    fun register(ten: String, email: String, matKhau: String) {
+    /** Register a new user (repository hashes password internally). */
+    fun register(name: String, email: String, password: String) {
+        val n = name.trim()
+        val e = email.trim()
+        val p = password.trim()
+
+        if (n.isEmpty() || e.isEmpty() || p.length < 6) {
+            _registerResult.value = "invalid"
+            return
+        }
+
         viewModelScope.launch {
-            val ketQua = withContext(Dispatchers.IO) {
+            val result = withContext(Dispatchers.IO) {
                 try {
-                    repo.register(ten, email, matKhau)
+                    accountRepository.register(n, e, p)
                     "ok"
-                } catch (e: IllegalStateException) {
-                    e.message ?: "email_exists"
-                } catch (_: IllegalArgumentException) {
-                    "invalid"
+                } catch (ise: IllegalStateException) {
+                    // From repository: "email_exists" or "invalid_input"
+                    when (ise.message) {
+                        "email_exists"  -> "email_exists"
+                        "invalid_input" -> "invalid"
+                        else            -> "failed"
+                    }
                 } catch (_: Throwable) {
                     "failed"
                 }
             }
-            _registerResult.value = ketQua
+            _registerResult.value = result
         }
     }
 }

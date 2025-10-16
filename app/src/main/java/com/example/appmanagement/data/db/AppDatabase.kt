@@ -9,16 +9,15 @@ import com.example.appmanagement.data.dao.UserDao
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.entity.User
 
-// RoomDatabase: điểm vào của Room, cung cấp các DAO
 @Database(
-    entities = [User::class, Task::class],  // thêm Task vào
-    version = 5,                            // tăng version lên
-    exportSchema = false
+    entities = [User::class, Task::class],
+    version = 1, // version hiện tại
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
-    abstract fun taskDao(): TaskDao          // thêm DAO cho Task
+    abstract fun taskDao(): TaskDao
 
     companion object {
         @Volatile
@@ -31,7 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "todo.db"
                 )
-
+                    // ⚠️ Thêm dòng này để xoá DB cũ khi version thay đổi
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

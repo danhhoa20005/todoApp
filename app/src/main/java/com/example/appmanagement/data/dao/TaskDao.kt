@@ -47,4 +47,39 @@ interface TaskDao {
 
     @Query("DELETE FROM tasks WHERE user_id = :userId")
     suspend fun deleteByUser(userId: Long): Int
+
+    // ===== Lấy danh sách đã sắp xếp =====
+
+    // Toàn bộ: ưu tiên chưa hoàn thành trước, rồi theo orderIndex
+    @Query("""
+SELECT * FROM tasks
+WHERE user_id = :userId
+ORDER BY is_completed ASC, order_index ASC, id DESC
+""")
+    fun getByUserOrdered(userId: Long): LiveData<List<Task>>
+
+    // Nếu bạn có 2 tab:
+    @Query("""
+SELECT * FROM tasks
+WHERE user_id = :userId AND is_completed = 0
+ORDER BY order_index ASC, id DESC
+""")
+    fun getUncompletedOrdered(userId: Long): LiveData<List<Task>>
+
+    @Query("""
+SELECT * FROM tasks
+WHERE user_id = :userId AND is_completed = 1
+ORDER BY order_index ASC, id DESC
+""")
+    fun getCompletedOrdered(userId: Long): LiveData<List<Task>>
+
+    // ===== Cập nhật order_index 1 item =====
+    @Query("UPDATE tasks SET order_index = :orderIndex WHERE id = :id")
+    suspend fun updateOrderIndex(id: Long, orderIndex: Int)
+
+    // (Tùy chọn) Cập nhật nhiều item trong 1 transaction cho nhanh
+    @Transaction
+    suspend fun updateOrderMany(pairs: List<Pair<Long, Int>>) {
+        pairs.forEach { (id, idx) -> updateOrderIndex(id, idx) }
+    }
 }

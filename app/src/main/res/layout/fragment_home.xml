@@ -1,230 +1,455 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_dark"
-    android:fillViewport="true"
+    android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
-        <!-- Header -->
+        <TextView
+            android:id="@+id/tvHello"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.85"
+            android:text="Hello"
+            android:textColor="@android:color/white"
+            android:textSize="32sp" />
+
+        <ImageView
+            android:id="@+id/imgAvatar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/avatar_male"
+            android:contentDescription="User Avatar" />
+    </LinearLayout>
+
+    <!-- Search -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/card_dark"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
             android:paddingVertical="8dp">
 
-            <TextView
-                android:id="@+id/tvHello"
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="@android:color/darker_gray"
+                android:contentDescription="Search Icon" />
+
+            <EditText
+                android:id="@+id/etSearch"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:alpha="0.85"
-                android:text="Hello"
+                android:layout_marginStart="12dp"
+                android:background="@null"
+                android:hint="Search tasks..."
+                android:textColorHint="@android:color/darker_gray"
                 android:textColor="@android:color/white"
-                android:textSize="32dp" />
-
-            <ImageView
-                android:id="@+id/imgAvatar"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/avatar_male" />
+                android:textSize="16sp" />
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
+    <!-- Progress card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@color/card_dark"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp">
 
-
-
-
-        <!-- Card: Priority Task Progress -->
-        <com.google.android.material.card.MaterialCardView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/card_dark"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            app:strokeWidth="1dp">
+            <TextView
+                android:id="@+id/tvPriorityTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Today’s Tasks"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvPrioritySub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:alpha="0.75"
+                android:text="3/5 is completed"
+                android:textColor="@android:color/white" />
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress"
+                style="@style/Widget.Material3.LinearProgressIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginTop="12dp"
+                app:indicatorDirectionLinear="startToEnd"
+                app:showAnimationBehavior="inward"
+                app:trackCornerRadius="8dp"
+                app:trackThickness="8dp" />
+
+            <TextView
+                android:id="@+id/tvPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="68.99%"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Fixed cards -->
+    <LinearLayout
+        android:id="@+id/fixedCards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp">
+
+        <!-- Weekly card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@color/card_dark"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="15dp">
 
                 <TextView
-                    android:id="@+id/tvPriorityTitle"
+                    android:id="@+id/tvWeekTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Today’s Tasks"
+                    android:text="Tasks in this week"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
+                    android:alpha="0.9"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="10dp" />
 
-                <TextView
-                    android:id="@+id/tvPrioritySub"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3/5 is completed"
-                    android:textColor="@android:color/white"
-                    android:alpha="0.75"
-                    android:layout_marginTop="6dp" />
-
-                <com.google.android.material.progressindicator.LinearProgressIndicator
-                    android:id="@+id/progress"
-                    style="@style/Widget.Material3.LinearProgressIndicator"
+                <!-- Hàng cột: số lượng cố định trên cùng, cột cố định dưới cùng -->
+                <LinearLayout
+                    android:id="@+id/rowBars"
                     android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="12dp"
-                    app:trackThickness="8dp"
-                    app:trackCornerRadius="8dp"
-                    app:indicatorDirectionLinear="startToEnd"
-                    app:showAnimationBehavior="inward" />
+                    android:layout_height="170dp"
+                    android:orientation="horizontal"
+                    android:gravity="fill_horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <!-- Ô Thứ 2 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblMonCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="0dp"/>
+
+                        <View
+                            android:id="@+id/barMon"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Thứ 3 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblTueCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barTue"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Thứ 4 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblWedCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barWed"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Thứ 5 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblThuCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barThu"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Thứ 6 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblFriCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barFri"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Thứ 7 -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblSatCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barSat"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+
+                    <!-- Ô Chủ nhật -->
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <TextView
+                            android:id="@+id/lblSunCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="13sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.9"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"/>
+
+                        <View
+                            android:id="@+id/barSun"
+                            android:layout_width="16dp"
+                            android:layout_height="0dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="2dp"
+                            android:background="@drawable/bg_bar_done"/>
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <!-- Nhãn ngày -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <TextView style="@style/TextLabelDay" android:text="T2" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="T3" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="T4" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="T5" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="T6" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="T7" android:layout_weight="1"/>
+                    <TextView style="@style/TextLabelDay" android:text="CN" android:layout_weight="1"/>
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tvPercent"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvEmptyWeek"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="68.99%"
+                    android:text="Tuần này chưa có công việc"
+                    android:textSize="14sp"
                     android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
+                    android:alpha="0.65"
+                    android:gravity="center"
+                    android:paddingTop="6dp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 3 thẻ thống kê -->
-        <LinearLayout
+        <!-- Completed card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardCompleted"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp">
+            android:layout_height="72dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/card_dark">
 
-            <!-- Total Task -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardTotalTask"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
-                app:cardBackgroundColor="@color/card_dark">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_avt"
+                    android:contentDescription="Completed tasks icon" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="Completed Tasks"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
 
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_avt" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:text="Week's Tasks"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tvTotalTask"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="16"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Completed -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardCompleted"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-
-                app:cardBackgroundColor="@color/card_dark">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_avt" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:text="Completed"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tvCompleted"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="32"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Total Projects -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardProjects"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-
-                app:cardBackgroundColor="@color/card_dark">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_avt" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:text="Total Projects"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tvProjects"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="8"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tvCompleted"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="8"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
-</ScrollView>
+
+    <!-- Only RecyclerView scrolls -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:overScrollMode="always" />
+
+</LinearLayout>

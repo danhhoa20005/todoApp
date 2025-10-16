@@ -14,7 +14,7 @@ import com.example.appmanagement.databinding.FragmentSettingBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
-import com.example.appmanagement.utils.AppGlobals
+import com.example.appmanagement.util.AppGlobals
 
 import kotlinx.coroutines.launch
 

@@ -46,7 +46,17 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Room (nếu chưa có)
+    // BCrypt
+    implementation("at.favre.lib:bcrypt:0.10.2")
 
+    // SQLCipher + AndroidX SQLite
+    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("androidx.sqlite:sqlite:2.4.0")
+
+    // EncryptedSharedPreferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -66,13 +76,7 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
-    // Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
-    implementation("com.google.firebase:firebase-analytics")
 
-    // Google Sign-In + Facebook Login
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-    implementation("com.facebook.android:facebook-login:16.3.0")
 
 
 }

@@ -11,24 +11,14 @@ import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
 import com.example.appmanagement.databinding.FragmentSignInBinding
-import com.example.appmanagement.utils.AppGlobals
+import com.example.appmanagement.util.AppGlobals
 
-
-// SignInFragment
-// --------------
-// Mục đích:
-// - Màn hình đăng nhập sau khi người dùng nhập email từ SignEmailFragment.
-// - Người dùng nhập mật khẩu, hệ thống gọi LoginViewModel để xác thực.
-// - Nếu đúng → điều hướng sang HomeFragment.
-// - Nếu sai → hiển thị thông báo lỗi.
-//
 class SignInFragment : Fragment() {
 
     private var _binding: FragmentSignInBinding? = null
     private val binding get() = _binding!!
 
-    // ViewModel quản lý logic đăng nhập
-    private val signInViewModel: SignInViewModel by viewModels()
+    private val viewModel: SignInViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,44 +32,52 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Lấy email từ Bundle (truyền từ SignEmailFragment)
-        val emailFromArgs = arguments?.getString("email") ?: ""
+        // Prefill email passed from SignEmailFragment
+        val emailFromArgs = arguments?.getString("email").orEmpty()
         binding.tvEmailDynamic.setText(emailFromArgs)
 
-        // Nút quay lại
-        binding.btnBack?.setOnClickListener {
-            findNavController().popBackStack()
-        }
+        // Back
+        binding.btnBack?.setOnClickListener { findNavController().popBackStack() }
 
-        // Nút đăng nhập
+        // Sign in
         binding.btnSignIn.setOnClickListener {
-            val passwordInput = binding.edtPassword.text?.toString()?.trim() ?: ""
-            val emailInput = binding.tvEmailDynamic.text?.toString()?.trim() ?: ""
+            val email = binding.tvEmailDynamic.text?.toString()?.trim().orEmpty()
+            val password = binding.edtPassword.text?.toString()?.trim().orEmpty()
 
-            if (emailInput.isEmpty() || passwordInput.isEmpty()) {
-                Toast.makeText(requireContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+            if (email.isEmpty() || password.isEmpty()) {
+                showToast("Please enter both email and password")
                 return@setOnClickListener
             }
 
-            // Gọi ViewModel để xác thực
-            signInViewModel.login(emailInput, passwordInput)
+            setLoading(true)
+            viewModel.login(email, password)
         }
 
-        // Quan sát kết quả đăng nhập
-        signInViewModel.loginResult.observe(viewLifecycleOwner) { isSuccess ->
-            if (isSuccess == true) {
-                // Thành công → điều hướng sang HomeFragment
+        // Observe login result
+        viewModel.loginResult.observe(viewLifecycleOwner) { success ->
+            setLoading(false)
+            if (success == true) {
                 AppGlobals.isLoggedIn = true
                 findNavController().navigate(R.id.action_signInFragment_to_homeFragment)
             } else {
-                // Thất bại → thông báo
-                Toast.makeText(requireContext(), "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show()
+                showToast("Incorrect email or password")
             }
         }
     }
 
+    private fun setLoading(loading: Boolean) {
+        binding.btnSignIn.isEnabled = !loading
+        binding.edtPassword.isEnabled = !loading
+        // If you have a ProgressBar in the layout, toggle it here.
+        // binding.progressBar.isVisible = loading
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // Giải phóng binding tránh leak bộ nhớ
+        _binding = null
     }
 }

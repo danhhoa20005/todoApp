@@ -12,20 +12,12 @@ import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
 import com.example.appmanagement.databinding.FragmentSignUpBinding
 
-// SignUpFragment
-// --------------
-// Mục đích:
-// - Màn hình đăng ký tài khoản mới.
-// - Người dùng nhập mật khẩu, xác nhận lại mật khẩu.
-// - Nếu hợp lệ → gọi LoginViewModel để tạo tài khoản.
-// - Thành công → chuyển sang CreateWorkFragment để bổ sung thông tin.
-//
 class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
 
-    // ViewModel quản lý logic đăng nhập/đăng ký
+    // KHÔNG dùng factory
     private val signInViewModel: SignInViewModel by viewModels()
 
     override fun onCreateView(
@@ -40,53 +32,38 @@ class SignUpFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Nhận email từ Bundle (SignEmailFragment gửi qua)
         val emailFromArgs = arguments?.getString("email") ?: ""
         binding.tvEmailDynamic.text = emailFromArgs
 
-        // Nút quay lại
         binding.btnBack.setOnClickListener { findNavController().popBackStack() }
 
-        // Nút Đăng ký
         binding.btnSignUp.setOnClickListener {
-            val passwordInput = binding.edtPassword.text?.toString()?.trim().orEmpty()
-            val confirmPasswordInput = binding.edtPasswordConfirm.text?.toString()?.trim().orEmpty()
+            val password = binding.edtPassword.text?.toString()?.trim().orEmpty()
+            val confirm  = binding.edtPasswordConfirm.text?.toString()?.trim().orEmpty()
 
-            if (emailFromArgs.isEmpty()) {
-                showToast("Thiếu email")
-                return@setOnClickListener
-            }
-            if (passwordInput.length < 6) {
-                showToast("Mật khẩu phải ≥ 6 ký tự")
-                return@setOnClickListener
-            }
-            if (passwordInput != confirmPasswordInput) {
-                showToast("Mật khẩu nhập lại không khớp")
-                return@setOnClickListener
-            }
+            if (emailFromArgs.isEmpty()) { toast("Thiếu email"); return@setOnClickListener }
+            if (password.length < 6) { toast("Mật khẩu phải ≥ 6 ký tự"); return@setOnClickListener }
+            if (password != confirm) { toast("Mật khẩu nhập lại không khớp"); return@setOnClickListener }
 
-            // Gọi ViewModel để đăng ký (tạm đặt name = phần trước @ của email)
-            val name = emailFromArgs.substringBefore('@')
-            signInViewModel.register(name, emailFromArgs, passwordInput)
+            val name = emailFromArgs.substringBefore('@').ifBlank { "User" }
+            signInViewModel.register(name, emailFromArgs, password)
         }
 
-        // Quan sát kết quả đăng ký
         signInViewModel.registerResult.observe(viewLifecycleOwner) { status ->
             when (status) {
                 "ok" -> {
-                    showToast("Tạo tài khoản thành công")
+                    toast("Tạo tài khoản thành công")
                     findNavController().navigate(R.id.action_signUp_to_createWork)
                 }
-                "email_exists" -> showToast("Email đã tồn tại")
-                "invalid" -> showToast("Thiếu thông tin hoặc mật khẩu không hợp lệ")
-                else -> showToast("Có lỗi, vui lòng thử lại")
+                "email_exists" -> toast("Email đã tồn tại")
+                "invalid" -> toast("Thiếu thông tin hoặc mật khẩu không hợp lệ")
+                else -> toast("Có lỗi, vui lòng thử lại")
             }
         }
     }
 
-    // Hàm hiển thị Toast
-    private fun showToast(message: String) =
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    private fun toast(msg: String) =
+        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
     override fun onDestroyView() {
         super.onDestroyView()
