@@ -13,4 +13,6 @@
     <string name="task_reminder_body_date">Ngày %1$s • Chạm để mở</string>
     <string name="task_reminder_body_default">Chạm để xem chi tiết công việc</string>
     <string name="task_notification_permission_rationale">Ứng dụng cần quyền để gửi thông báo nhắc việc.</string>
+    <string name="settings_theme_title">Chế độ tối</string>
+    <string name="settings_theme_subtitle">Chuyển đổi giữa giao diện tối và sáng</string>
 </resources>

@@ -17,6 +17,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.databinding.ActivityMainBinding
 import com.example.appmanagement.util.TaskReminderScheduler
+import com.example.appmanagement.util.ThemeUtils
 import com.google.android.material.navigation.NavigationBarView
 
 private const val REQUEST_POST_NOTIFICATIONS = 1001
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applySavedTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 

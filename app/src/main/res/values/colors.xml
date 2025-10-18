@@ -4,19 +4,27 @@
     <!-- Cơ bản -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
+    <color name="white_soft">#F7F9FC</color>
 
     <!-- Nền ứng dụng -->
-    <color name="bg_dark">#181A20</color>      <!-- Background 01 -->
-    <color name="card_dark">#1F222A</color>    <!-- Background 02 / Surface -->
+    <color name="bg_dark">#F5F7FE</color>      <!-- Background 01 (light default) -->
+    <color name="card_dark">#FFFFFF</color>    <!-- Background 02 / Surface -->
+
+    <color name="background_primary">@color/white_soft</color>
+    <color name="background_surface">@color/white</color>
 
     <!-- Text -->
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_gray">#B0B3B8</color>
+    <color name="text_white">#181A20</color>
+    <color name="text_gray">#5F6368</color>
+    <color name="text_primary_color">#181A20</color>
+    <color name="text_secondary_color">#5F6368</color>
     <color name="text_highlight">#FFD700</color> <!-- số/nhấn -->
+
+    <color name="outline_neutral">#1A000000</color>
 
     <!-- Tab / Điều hướng -->
     <color name="tab_inactive">#808080</color>
-    <color name="tab_active">#FFFFFF</color>
+    <color name="tab_active">#3D7BFF</color>
     <color name="tab_blue">#3D7BFF</color>      <!-- PRIMARY từ palette -->
 
     <!-- Primary / Secondary (theo “Main Colors”) -->

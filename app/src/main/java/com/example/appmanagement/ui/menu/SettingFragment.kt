@@ -6,17 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.databinding.FragmentSettingBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import androidx.lifecycle.lifecycleScope
 import com.example.appmanagement.util.AppGlobals
+import com.example.appmanagement.util.ThemeUtils
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingFragment : Fragment() {
 
@@ -75,6 +76,14 @@ class SettingFragment : Fragment() {
 
         // Back
         b.btnBack.setOnClickListener { findNavController().navigateUp() }
+
+        val themeSwitch = b.switchTheme
+        val isDarkModeEnabled = ThemeUtils.isDarkModeSelected(requireContext())
+        themeSwitch.isChecked = isDarkModeEnabled
+        themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            ThemeUtils.persistDarkMode(requireContext(), isChecked)
+            ThemeUtils.applyTheme(isChecked)
+        }
 
         // Logout -> Onboard (đã có action trong nav_graph)
         b.btnLogout.setOnClickListener {
