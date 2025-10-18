@@ -15,6 +15,7 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.databinding.FragmentAddBinding
+import com.example.appmanagement.util.TaskReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -109,11 +110,12 @@ class AddFragment : Fragment() {
             }
         }
 
-        if (!ok) return
+        if (!ok || dateObj == null) return
         // -----------------------------------------
 
+        val appContext = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext().applicationContext)
+            val db = AppDatabase.getInstance(appContext)
             val currentUser = withContext(Dispatchers.IO) {
                 AccountRepository(db.userDao()).getCurrentUser()
             }
@@ -135,6 +137,7 @@ class AddFragment : Fragment() {
 
             val insertedId = withContext(Dispatchers.IO) { db.taskDao().insert(task) }
             if (insertedId > 0) {
+                TaskReminderScheduler.schedule(appContext, insertedId, title, date, start)
                 Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_addFragment_to_homeFragment)
             } else {

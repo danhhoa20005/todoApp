@@ -15,6 +15,7 @@ import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentCalendarBinding
+import com.example.appmanagement.util.TaskReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,7 +61,8 @@ class CalendarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Khởi tạo DB + Repo
-        val database = AppDatabase.getInstance(requireContext().applicationContext)
+        val appContext = requireContext().applicationContext
+        val database = AppDatabase.getInstance(appContext)
         accountRepository = AccountRepository(database.userDao())
         taskRepository = TaskRepository(database.taskDao())
 
@@ -69,12 +71,18 @@ class CalendarFragment : Fragment() {
             onEditClick = { /* mở Edit nếu cần */ },
             onDeleteClick = { task ->
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    TaskReminderScheduler.cancel(appContext, task.id)
                     taskRepository.delete(task)
                 }
             },
             onCheckClick = { task ->
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepository.toggle(task)
+                    if (!task.isCompleted) {
+                        TaskReminderScheduler.cancel(appContext, task.id)
+                    } else {
+                        TaskReminderScheduler.schedule(appContext, task.id, task.title, task.taskDate, task.startTime)
+                    }
                 }
             }
         )

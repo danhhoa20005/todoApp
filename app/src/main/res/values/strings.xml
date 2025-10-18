@@ -6,7 +6,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="today_completed_sub">%1$d/%2$d đã hoàn thành</string>
     <string name="percent_format">%.2f%%</string>
-
-
-
+    <string name="task_reminder_channel_name">Nhắc công việc</string>
+    <string name="task_reminder_channel_desc">Thông báo khi đến giờ bắt đầu công việc đã tạo</string>
+    <string name="task_reminder_title">Đến giờ: %1$s</string>
+    <string name="task_reminder_body_time">Bắt đầu lúc %1$s • Chạm để mở</string>
+    <string name="task_reminder_body_date">Ngày %1$s • Chạm để mở</string>
+    <string name="task_reminder_body_default">Chạm để xem chi tiết công việc</string>
+    <string name="task_notification_permission_rationale">Ứng dụng cần quyền để gửi thông báo nhắc việc.</string>
 </resources>

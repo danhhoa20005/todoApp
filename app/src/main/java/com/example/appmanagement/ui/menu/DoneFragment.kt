@@ -16,6 +16,7 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentDoneBinding
+import com.example.appmanagement.util.TaskReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,6 +57,7 @@ class DoneFragment : Fragment() {
             },
             onDeleteClick = { task ->
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    TaskReminderScheduler.cancel(appContext, task.id)
                     taskRepo.delete(task)
                 }
             },
@@ -63,6 +65,11 @@ class DoneFragment : Fragment() {
                 // Ở màn Done: nhấn ✅ để khôi phục về "chưa hoàn thành"
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepo.toggle(task)
+                    if (task.isCompleted) {
+                        TaskReminderScheduler.schedule(appContext, task.id, task.title, task.taskDate, task.startTime)
+                    } else {
+                        TaskReminderScheduler.cancel(appContext, task.id)
+                    }
                 }
             }
         )

@@ -56,7 +56,8 @@ class HomeFragment : Fragment() {
 
         showCards(true)
 
-        val db = AppDatabase.getInstance(requireContext())
+        val appContext = requireContext().applicationContext
+        val db = AppDatabase.getInstance(appContext)
         val repo = AccountRepository(db.userDao())
 
         // User + avatar
@@ -113,6 +114,7 @@ class HomeFragment : Fragment() {
             },
             onDeleteClick = { task ->
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    TaskReminderScheduler.cancel(appContext, task.id)
                     db.taskDao().delete(task)
                 }
             },
@@ -120,6 +122,11 @@ class HomeFragment : Fragment() {
                 // Cập nhật DB; UI sẽ tự đồng bộ lại qua observer ở trên
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     db.taskDao().setCompleted(task.id, !task.isCompleted)
+                    if (!task.isCompleted) {
+                        TaskReminderScheduler.cancel(appContext, task.id)
+                    } else {
+                        TaskReminderScheduler.schedule(appContext, task.id, task.title, task.taskDate, task.startTime)
+                    }
                 }
             }
         )

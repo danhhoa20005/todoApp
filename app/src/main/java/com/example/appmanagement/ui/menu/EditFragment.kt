@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.databinding.FragmentEditBinding
+import com.example.appmanagement.util.TaskReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,8 +38,9 @@ class EditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val appContext = requireContext().applicationContext
         // Lấy DB singleton
-        val db = AppDatabase.getInstance(requireContext())
+        val db = AppDatabase.getInstance(appContext)
         val taskDao = db.taskDao()
 
         // 1) Nạp task theo id và đổ lên UI
@@ -89,6 +91,13 @@ class EditFragment : Fragment() {
                     isCompleted = completed   // ✅ LƯU trạng thái hoàn thành
                 )
                 taskDao.update(updated)
+
+                if (updated.isCompleted) {
+                    TaskReminderScheduler.cancel(appContext, updated.id)
+                } else {
+                    TaskReminderScheduler.schedule(appContext, updated.id, updated.title, updated.taskDate, updated.startTime)
+                }
+
                 withContext(Dispatchers.Main) { findNavController().navigateUp() }
             }
         }
@@ -98,8 +107,6 @@ class EditFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-
 
     private fun showDatePicker() {
         val c = Calendar.getInstance()

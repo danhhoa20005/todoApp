@@ -14,6 +14,7 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentListBinding
+import com.example.appmanagement.util.TaskReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,10 +53,20 @@ class ListFragment : Fragment() {
                 findNavController().navigate(action)
             },
             onDeleteClick = { task ->
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) { taskRepo.delete(task) }
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    TaskReminderScheduler.cancel(appContext, task.id)
+                    taskRepo.delete(task)
+                }
             },
             onCheckClick = { task ->
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) { taskRepo.toggle(task) }
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    taskRepo.toggle(task)
+                    if (!task.isCompleted) {
+                        TaskReminderScheduler.cancel(appContext, task.id)
+                    } else {
+                        TaskReminderScheduler.schedule(appContext, task.id, task.title, task.taskDate, task.startTime)
+                    }
+                }
             }
         )
 
