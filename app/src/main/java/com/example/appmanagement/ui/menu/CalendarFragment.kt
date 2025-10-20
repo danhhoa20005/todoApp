@@ -174,7 +174,7 @@ class CalendarFragment : Fragment() {
                 )
                 // Không cập nhật khi đang kéo để tránh khựng
                 if (!isDragging) {
-                    taskAdapter.submitDataOnce(resultList)
+                    taskAdapter.submitList(resultList)
                     if (resultList.isNotEmpty()) binding.rvTasks.scrollToPosition(0)
                 }
             }

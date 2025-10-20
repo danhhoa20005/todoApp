@@ -59,7 +59,7 @@ class HomeFragment : Fragment() {
         val db = AppDatabase.getInstance(requireContext())
         val repo = AccountRepository(db.userDao())
 
-        // User + avatar
+        // Hiển thị user + avatar (đọc từ repo; có thể chuyển sang observe trong VM nếu muốn realtime)
         viewLifecycleOwner.lifecycleScope.launch {
             val u = withContext(Dispatchers.IO) { repo.getCurrentUser() }
             if (u != null) {
@@ -87,12 +87,15 @@ class HomeFragment : Fragment() {
             // 1) Thống kê hôm nay
             applyTodayStats(data)
 
-            // 2) Biểu đồ tuần (full cột = 30 task)
+            // 2) Biểu đồ tuần
             val counts = WeekChart.computeWeekCounts(data)
             WeekChart.render(
                 rowBars = b.rowBars,
                 bars = listOf(b.barMon, b.barTue, b.barWed, b.barThu, b.barFri, b.barSat, b.barSun),
-                labels = listOf(b.lblMonCount, b.lblTueCount, b.lblWedCount, b.lblThuCount, b.lblFriCount, b.lblSatCount, b.lblSunCount),
+                labels = listOf(
+                    b.lblMonCount, b.lblTueCount, b.lblWedCount, b.lblThuCount,
+                    b.lblFriCount, b.lblSatCount, b.lblSunCount
+                ),
                 tvEmptyWeek = b.tvEmptyWeek,
                 counts = counts,
                 onBarClick = { onDayClicked(it) },
@@ -102,9 +105,11 @@ class HomeFragment : Fragment() {
             // 3) Cập nhật kết quả tìm kiếm theo text hiện tại
             submitSearch(data, b.etSearch.text?.toString().orEmpty())
         }
-        vm.filterByDate(toDayString())
 
-        // Adapter danh sách tìm kiếm (working list)
+        // ↓↓↓ BỎ: Home không tự lọc theo ngày, để ViewModel cung cấp "all"
+        // vm.filterByDate(toDayString())
+
+        // Adapter danh sách tìm kiếm
         searchAdapter = TaskAdapter(
             onEditClick = { task ->
                 findNavController().navigate(
@@ -112,15 +117,12 @@ class HomeFragment : Fragment() {
                 )
             },
             onDeleteClick = { task ->
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    db.taskDao().delete(task)
-                }
+                // chuyển về ViewModel để đảm bảo đúng userId
+                vm.deleteTask(task)
             },
             onCheckClick = { task ->
-                // Cập nhật DB; UI sẽ tự đồng bộ lại qua observer ở trên
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    db.taskDao().setCompleted(task.id, !task.isCompleted)
-                }
+                // chuyển về ViewModel để đảm bảo đúng userId
+                vm.toggleTask(task)
             }
         )
 
@@ -157,6 +159,12 @@ class HomeFragment : Fragment() {
         )
     }
 
+    // Nếu bạn KHÔNG clear ViewModel khi logout, nên nạp lại user ở đây
+    override fun onResume() {
+        super.onResume()
+        vm.reloadCurrentUser()
+    }
+
     private fun showCards(show: Boolean) {
         b.cardProgress.isVisible = show
         b.cardWeek.isVisible = show
@@ -167,7 +175,8 @@ class HomeFragment : Fragment() {
     private fun submitSearch(all: List<Task>, raw: String) {
         val key = raw.trim().lowercase(Locale.getDefault())
         if (key.isEmpty()) {
-            searchAdapter.submitDataOnce(emptyList())
+            // ĐỔI: submitDataOnce -> submitList để luôn refresh
+            searchAdapter.submitList(emptyList())
             showCards(true)
             return
         }
@@ -181,7 +190,8 @@ class HomeFragment : Fragment() {
             t.contains(key) || d.contains(key) || day.contains(key) || s.contains(key) || e.contains(key)
         }
 
-        searchAdapter.submitDataOnce(filtered)
+        // ĐỔI: submitDataOnce -> submitList
+        searchAdapter.submitList(filtered)
         showCards(false)
     }
 

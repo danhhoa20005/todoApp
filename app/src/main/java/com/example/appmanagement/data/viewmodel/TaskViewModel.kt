@@ -24,8 +24,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val taskRepository by lazy { TaskRepository(database.taskDao()) }
     private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
+    /* Lưu user hiện tại (id) */
     private val currentUserId = MutableLiveData<Long?>()
 
+    /* LiveData công khai cho UI */
     private val _tasksAll = MediatorLiveData<List<Task>>()
     val tasksAll: LiveData<List<Task>> get() = _tasksAll
 
@@ -38,65 +40,84 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     private val _tasksByDate = MediatorLiveData<List<Task>>()
     val tasksByDate: LiveData<List<Task>> get() = _tasksByDate
 
-    /** --- NEW: dữ liệu cho biểu đồ tuần --- */
+    /* Dữ liệu cho biểu đồ tuần */
     private val _weekCounts = MediatorLiveData<IntArray>()    // [Mon..Sun]
     val weekCounts: LiveData<IntArray> get() = _weekCounts
 
-    private val _weekPercents = MediatorLiveData<IntArray>()  // [Mon..Sun] 0..100 theo trần 20
+    private val _weekPercents = MediatorLiveData<IntArray>()  // [Mon..Sun] 0..100 theo trần cap
     val weekPercents: LiveData<IntArray> get() = _weekPercents
 
+    /* Giữ tham chiếu nguồn hiện tại để removeSource đúng cách */
+    private var allSource: LiveData<List<Task>>? = null
+    private var todoSource: LiveData<List<Task>>? = null
+    private var doneSource: LiveData<List<Task>>? = null
+    private var byDateSource: LiveData<List<Task>>? = null
+
+    private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
     init {
-        // 1) Nạp user đăng nhập hiện tại
+        /* Nạp user hiện tại khi ViewModel tạo */
         loadCurrentUser()
 
-        // 2) Khi có userId -> gắn nguồn dữ liệu
+        /* Gắn nguồn động theo user cho từng nhóm LiveData */
         _tasksAll.addSource(currentUserId) { uid ->
             _tasksAll.value = emptyList()
+            allSource?.let { _tasksAll.removeSource(it) }
             if (uid != null) {
                 val src = taskRepository.all(uid)
+                allSource = src
                 _tasksAll.addSource(src) { list ->
                     _tasksAll.value = list
-                    // Mỗi lần all tasks đổi -> cập nhật dữ liệu tuần
                     computeWeeklySeries(list.orEmpty())
                 }
+            } else {
+                computeWeeklySeries(emptyList())
             }
         }
 
         _tasksTodo.addSource(currentUserId) { uid ->
             _tasksTodo.value = emptyList()
+            todoSource?.let { _tasksTodo.removeSource(it) }
             if (uid != null) {
                 val src = taskRepository.uncompleted(uid)
+                todoSource = src
                 _tasksTodo.addSource(src) { _tasksTodo.value = it }
             }
         }
 
         _tasksDone.addSource(currentUserId) { uid ->
             _tasksDone.value = emptyList()
+            doneSource?.let { _tasksDone.removeSource(it) }
             if (uid != null) {
                 val src = taskRepository.completed(uid)
+                doneSource = src
                 _tasksDone.addSource(src) { _tasksDone.value = it }
             }
         }
-        // _tasksByDate gắn nguồn khi filterByDate(...)
+        /* _tasksByDate chỉ gắn khi gọi filterByDate(...) */
     }
 
+    /* Nạp user hiện tại (lấy từ AccountRepository) */
     private fun loadCurrentUser() = viewModelScope.launch {
         val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
         currentUserId.value = user?.id
     }
 
-    /** Lọc theo ngày */
+    /* Cho phép màn hình gọi lại sau khi đăng nhập/đăng xuất */
+    fun reloadCurrentUser() = loadCurrentUser()
+
+    /* Lọc theo ngày – nguồn động theo user + date */
     fun filterByDate(date: String) {
-        val uid = currentUserId.value ?: run {
-            _tasksByDate.value = emptyList()
-            return
-        }
+        val uid = currentUserId.value
         _tasksByDate.value = emptyList()
-        val source = taskRepository.byDate(uid, date)
-        _tasksByDate.addSource(source) { _tasksByDate.value = it }
+        byDateSource?.let { _tasksByDate.removeSource(it) }
+        if (uid == null) return
+        val src = taskRepository.byDate(uid, date)
+        byDateSource = src
+        _tasksByDate.addSource(src) { _tasksByDate.value = it }
     }
 
-    /** Thêm Task */
+    /* Thêm Task – gắn đúng userId hiện tại */
     fun addTask(
         title: String,
         description: String,
@@ -108,26 +129,22 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         taskRepository.add(uid, title, description, taskDate, startTime, endTime)
     }
 
-    /** Cập nhật Task */
+    /* Cập nhật Task (giữ nguyên userId trong task) */
     fun updateTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.update(task)
     }
 
-    /** Xoá Task */
+    /* Xoá Task */
     fun deleteTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.delete(task)
     }
 
-    /** Đổi trạng thái hoàn thành */
+    /* Đổi trạng thái hoàn thành */
     fun toggleTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.toggle(task)
     }
 
-    // ------------------ WEEKLY CHART HELPERS ------------------
-
-    private val dateFormatter: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
+    /* --------- XỬ LÝ DỮ LIỆU CHO BIỂU ĐỒ TUẦN --------- */
 
     private fun computeWeeklySeries(all: List<Task>) {
         val counts = countCompletedLast7DaysByDow(all)
@@ -135,10 +152,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _weekPercents.value = countsToPercents(counts, capPerDay = 20)
     }
 
+    /* Đếm số task đã hoàn thành trong 7 ngày gần nhất theo thứ (Mon..Sun) */
     private fun countCompletedLast7DaysByDow(all: List<Task>): IntArray {
         val today = LocalDate.now()
         val start = today.minusDays(6)
-        val byDay = IntArray(7) { 0 } // Mon..Sun
+        val byDay = IntArray(7) { 0 }
 
         all.forEach { task ->
             if (!task.isCompleted) return@forEach
@@ -158,13 +176,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         return byDay
     }
 
-    /** Quy đổi theo trần (capPerDay = 20), trả về % 0..100 cho 7 ngày */
+    /* Quy đổi số lượng sang phần trăm với ngưỡng trần mỗi ngày */
     private fun countsToPercents(counts: IntArray, capPerDay: Int): IntArray {
         return IntArray(7) { i ->
             val clamped = counts[i].coerceAtMost(capPerDay)
-            // Nếu muốn có “tối thiểu 5% khi >0” để luôn thấy cột thì dùng:
-            // val raw = (clamped * 100f / capPerDay).roundToInt()
-            // if (counts[i] > 0) maxOf(raw, 5) else 0
             (clamped * 100f / capPerDay).roundToInt()
         }
     }

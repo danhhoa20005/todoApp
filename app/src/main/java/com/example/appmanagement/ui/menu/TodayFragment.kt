@@ -132,7 +132,7 @@ class TodayFragment : Fragment() {
                         .thenByDescending { it.id }
                 )
                 if (!isDragging) {
-                    taskAdapter.submitDataOnce(sorted)   // KHÔNG cập nhật khi đang kéo
+                    taskAdapter.submitList(sorted)   // KHÔNG cập nhật khi đang kéo
                     if (sorted.isNotEmpty()) binding.rvTasks.scrollToPosition(0)
                 }
             }

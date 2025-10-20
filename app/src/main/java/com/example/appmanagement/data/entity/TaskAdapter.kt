@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appmanagement.R
@@ -25,6 +26,48 @@ class TaskAdapter(
     init { setHasStableIds(true) }
     override fun getItemId(position: Int) = items[position].id
     override fun getItemCount(): Int = items.size
+
+    /* ----- DiffUtil để cập nhật mượt ----- */
+    private class TaskDiff(
+        private val old: List<Task>,
+        private val new: List<Task>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize() = old.size
+        override fun getNewListSize() = new.size
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean =
+            old[oldPos].id == new[newPos].id
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean =
+            old[oldPos] == new[newPos]
+    }
+
+    /** NẠP DỮ LIỆU (thay cho submitDataOnce): luôn diff & refresh */
+    fun submitList(list: List<Task>) {
+        // Nếu item đang chọn không còn trong danh sách mới thì bỏ chọn
+        if (selectedId != null && list.none { it.id == selectedId }) selectedId = null
+        val diff = DiffUtil.calculateDiff(TaskDiff(items, list))
+        items.clear()
+        items.addAll(list)
+        diff.dispatchUpdatesTo(this)
+    }
+
+    /* chỉ đổi thứ tự trong working list; notifyItemMoved() gọi ở Fragment nếu cần */
+    fun swapItems(from: Int, to: Int) {
+        if (from == to) return
+        val t = items.removeAt(from)
+        items.add(to, t)
+    }
+
+    fun snapshotIdsWithIndex(): List<Pair<Long, Int>> =
+        items.mapIndexed { i, t -> t.id to i }
+
+    override fun onCreateViewHolder(p: ViewGroup, v: Int): TaskViewHolder {
+        val b = ItemTaskBinding.inflate(LayoutInflater.from(p.context), p, false)
+        return TaskViewHolder(b)
+    }
+
+    override fun onBindViewHolder(h: TaskViewHolder, i: Int) {
+        h.bind(items[i])
+    }
 
     inner class TaskViewHolder(private val b: ItemTaskBinding) :
         RecyclerView.ViewHolder(b.root) {
@@ -49,13 +92,14 @@ class TaskAdapter(
             b.btnDelete.setOnClickListener {
                 AlertDialog.Builder(ctx)
                     .setTitle("Xác nhận")
-                    .setMessage("Bạn có chắc muốn xóa công việc này không?")
+                    .setMessage("Bạn có chắc muốn xoá công việc này không?")
                     .setPositiveButton("Có") { _, _ -> onDeleteClick(t) }
                     .setNegativeButton("Không", null)
                     .show()
             }
             b.btnCheck.setOnClickListener { onCheckClick(t) }
 
+            // chọn item để đổi màu
             b.root.setOnClickListener {
                 val oldId = selectedId
                 selectedId = t.id
@@ -85,30 +129,5 @@ class TaskAdapter(
                 else -> "Không có thời gian"
             }
         }
-    }
-
-    fun submitDataOnce(list: List<Task>) {
-        items.clear()
-        items.addAll(list)
-        notifyDataSetChanged()
-    }
-
-    // chỉ đổi thứ tự trong working list; notifyItemMoved() đã gọi ở Fragment
-    fun swapItems(from: Int, to: Int) {
-        if (from == to) return
-        val t = items.removeAt(from)
-        items.add(to, t)
-    }
-
-    fun snapshotIdsWithIndex(): List<Pair<Long, Int>> =
-        items.mapIndexed { i, t -> t.id to i }
-
-    override fun onCreateViewHolder(p: ViewGroup, v: Int): TaskViewHolder {
-        val b = ItemTaskBinding.inflate(LayoutInflater.from(p.context), p, false)
-        return TaskViewHolder(b)
-    }
-
-    override fun onBindViewHolder(h: TaskViewHolder, i: Int) {
-        h.bind(items[i])
     }
 }

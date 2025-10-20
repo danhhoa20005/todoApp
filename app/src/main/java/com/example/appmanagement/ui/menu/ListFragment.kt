@@ -123,7 +123,7 @@ class ListFragment : Fragment() {
                 taskRepo.all(it.id).observe(viewLifecycleOwner) { tasks ->
                     if (!isDragging) {
                         // đồng bộ một lần mỗi khi DB thay đổi – KHÔNG gọi trong lúc kéo
-                        taskAdapter.submitDataOnce(tasks)
+                        taskAdapter.submitList(tasks)
                     }
                 }
             }
