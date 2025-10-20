@@ -1,4 +1,3 @@
-// Lớp AppDatabase cấu hình Room Database lưu bảng người dùng và công việc với singleton dùng toàn ứng dụng
 package com.example.appmanagement.data.db
 
 import android.content.Context
@@ -31,7 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "todo.db"
                 )
-                    // Dòng fallback bảo đảm xóa cơ sở dữ liệu cũ khi tăng version để tránh xung đột lược đồ
+                    // ⚠️ Thêm dòng này để xoá DB cũ khi version thay đổi
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

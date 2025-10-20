@@ -1,4 +1,3 @@
-// Fragment HomeFragment tổng hợp thống kê, tìm kiếm và điều hướng nhanh cho bảng điều khiển công việc
 package com.example.appmanagement.ui.home
 
 import android.os.Bundle

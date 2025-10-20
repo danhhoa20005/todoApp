@@ -1,4 +1,3 @@
-// Fragment SignInFragment cung cấp giao diện nhập mật khẩu để đăng nhập bằng email đã xác nhận
 package com.example.appmanagement.ui.login
 
 import android.os.Bundle

@@ -1,4 +1,3 @@
-// Định nghĩa thực thể Task dùng Room để lưu trữ thông tin công việc gắn với người dùng
 package com.example.appmanagement.data.entity
 
 import androidx.room.*
@@ -40,19 +39,19 @@ data class Task(
     @ColumnInfo(name = "is_completed")
     val isCompleted: Boolean = false,
 
-    // Ngày thực hiện (ví dụ: "2025-10-04")
+    // ✅ Ngày thực hiện (ví dụ: "2025-10-04")
     @ColumnInfo(name = "task_date")
     val taskDate: String = "",
 
-    // Thời gian bắt đầu (ví dụ: "08:30")
+    // ✅ Thời gian bắt đầu (ví dụ: "08:30")
     @ColumnInfo(name = "start_time")
     val startTime: String = "",
 
-    // Thời gian kết thúc (ví dụ: "10:00")
+    // ✅ Thời gian kết thúc (ví dụ: "10:00")
     @ColumnInfo(name = "end_time")
     val endTime: String = "",
 
-    // Thời điểm tạo (mặc định = thời gian hiện tại)
+    // ✅ Thời điểm tạo (mặc định = thời gian hiện tại)
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis()
 )

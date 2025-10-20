@@ -1,4 +1,3 @@
-// Bộ TaskAdapter quản lý hiển thị danh sách công việc trong RecyclerView kèm thao tác chỉnh sửa, xóa, đánh dấu
 package com.example.appmanagement.ui.menu
 
 import android.app.AlertDialog

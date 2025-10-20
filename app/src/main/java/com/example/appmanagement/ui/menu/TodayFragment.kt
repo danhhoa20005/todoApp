@@ -1,4 +1,3 @@
-// Fragment TodayFragment tập trung vào danh sách công việc của ngày hiện tại với thao tác kéo thả
 package com.example.appmanagement.ui.menu
 
 import android.os.Bundle

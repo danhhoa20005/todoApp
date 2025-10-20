@@ -1,4 +1,3 @@
-// Lớp TaskRepository gom các thao tác với TaskDao để tầng ViewModel sử dụng gọn gàng
 package com.example.appmanagement.data.repo
 
 import com.example.appmanagement.data.dao.TaskDao

@@ -1,4 +1,3 @@
-// ViewModel SignInViewModel xử lý đăng nhập và đăng ký bằng cách gọi AccountRepository trong coroutine
 package com.example.appmanagement.data.viewmodel
 
 import android.app.Application

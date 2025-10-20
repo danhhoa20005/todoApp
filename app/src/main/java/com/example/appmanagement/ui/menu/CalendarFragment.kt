@@ -1,4 +1,3 @@
-// Fragment CalendarFragment hiển thị lịch và danh sách công việc theo ngày với khả năng kéo thả sắp xếp
 package com.example.appmanagement.ui.menu
 
 import android.os.Bundle

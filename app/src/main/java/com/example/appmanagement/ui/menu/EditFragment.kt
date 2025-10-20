@@ -1,4 +1,3 @@
-// Fragment EditFragment phục vụ chỉnh sửa thông tin một công việc hiện có thông qua Safe Args
 package com.proptit.room_database.ui.addedit
 
 import android.app.DatePickerDialog
@@ -51,7 +50,7 @@ class EditFragment : Fragment() {
             binding.edtStartTime.setText(t.startTime)
             binding.edtEndTime.setText(t.endTime)
 
-            // Gắn trạng thái hoàn thành vào switch hiển thị
+            // ✅ Gắn trạng thái hoàn thành vào switch
             binding.switchCompleted.isChecked = t.isCompleted
             // (màu chữ của switch đã set cố định #40FFFFFF trong XML nên không cần code)
         }
@@ -68,7 +67,7 @@ class EditFragment : Fragment() {
             val date = binding.edtDate.text?.toString()?.trim().orEmpty()
             val start = binding.edtStartTime.text?.toString()?.trim().orEmpty()
             val end = binding.edtEndTime.text?.toString()?.trim().orEmpty()
-            val completed = binding.switchCompleted.isChecked  // Lấy trạng thái hoàn thành từ switch
+            val completed = binding.switchCompleted.isChecked  // ✅ lấy trạng thái từ switch
 
             if (title.isBlank()) {
                 binding.edtTitle.error = "Vui lòng nhập tiêu đề"
@@ -87,7 +86,7 @@ class EditFragment : Fragment() {
                     taskDate = date,
                     startTime = start,
                     endTime = end,
-                    isCompleted = completed   // Lưu trạng thái hoàn thành khi cập nhật
+                    isCompleted = completed   // ✅ LƯU trạng thái hoàn thành
                 )
                 taskDao.update(updated)
                 withContext(Dispatchers.Main) { findNavController().navigateUp() }

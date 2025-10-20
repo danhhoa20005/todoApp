@@ -1,4 +1,3 @@
-// Tập tin định nghĩa MainActivity chịu trách nhiệm khởi tạo giao diện chính và điều hướng BottomNavigation
 package com.example.appmanagement.ui.main
 
 import android.os.Bundle

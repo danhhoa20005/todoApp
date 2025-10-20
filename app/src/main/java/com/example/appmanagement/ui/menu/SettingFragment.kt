@@ -1,4 +1,3 @@
-// Fragment SettingFragment hiển thị thông tin người dùng và cho phép đăng xuất khỏi ứng dụng
 package com.example.appmanagement.ui.menu
 
 import android.net.Uri
@@ -41,7 +40,7 @@ class SettingFragment : Fragment() {
 
         // Lấy user theo userId (suspend) rồi đổ UI
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val u = userDao.getById(args.userId)   // Lấy thông tin người dùng theo đối số truyền vào
+            val u = userDao.getById(args.userId)   // ⬅ đổi từ getByIdOnce() -> getById()
             withContext(Dispatchers.Main) {
                 if (u == null) {
                     b.tvName.text = "Unknown User"

@@ -1,4 +1,3 @@
-// Fragment PlashOnboardFragment đóng vai trò splash kiểm tra trạng thái đăng nhập trước khi điều hướng
 package com.example.appmanagement.ui.splash
 
 import android.os.Bundle

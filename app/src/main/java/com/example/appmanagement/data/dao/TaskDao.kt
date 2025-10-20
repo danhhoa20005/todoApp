@@ -1,4 +1,3 @@
-// Giao diện TaskDao định nghĩa các truy vấn Room quản lý danh sách công việc theo người dùng
 package com.example.appmanagement.data.dao
 
 import androidx.lifecycle.LiveData

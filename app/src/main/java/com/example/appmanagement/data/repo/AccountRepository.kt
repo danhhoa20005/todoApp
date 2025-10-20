@@ -1,4 +1,3 @@
-// Lớp AccountRepository làm trung gian giữa tầng dữ liệu và ViewModel cho các thao tác tài khoản người dùng
 package com.example.appmanagement.data.repo
 
 import com.example.appmanagement.data.dao.UserDao

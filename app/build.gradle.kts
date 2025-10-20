@@ -1,4 +1,3 @@
-// Tập tin cấu hình Gradle cho mô-đun ứng dụng, khai báo plugin, thông số build và thư viện phụ thuộc
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")

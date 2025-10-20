@@ -1,4 +1,3 @@
-// ViewModel CreateWorkViewModel phụ trách tải và cập nhật hồ sơ người dùng phục vụ màn hình cài đặt
 package com.example.appmanagement.data.viewmodel
 
 import androidx.lifecycle.LiveData
