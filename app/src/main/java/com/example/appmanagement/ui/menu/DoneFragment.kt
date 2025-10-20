@@ -122,7 +122,7 @@ class DoneFragment : Fragment() {
             user?.let {
                 taskRepo.completed(it.id).observe(viewLifecycleOwner) { tasks ->
                     if (!isDragging) {
-                        taskAdapter.submitDataOnce(tasks) // KHÔNG cập nhật khi đang kéo
+                        taskAdapter.submitList(tasks) // KHÔNG cập nhật khi đang kéo
                     }
                 }
             }
