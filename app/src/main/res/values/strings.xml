@@ -1,3 +1,4 @@
+<!-- // Chuỗi giao diện dùng chung cho ứng dụng -->
 <resources>
     <string name="app_name">AppManagement</string>
     <string name="facebook_app_id">1234567890</string>

@@ -1,3 +1,4 @@
+<!-- // Biểu tượng avatar nữ sử dụng dạng vector -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:autoMirrored="true" android:height="800dp" android:viewportHeight="89.048" android:viewportWidth="89.048" android:width="800dp">
       
     <path android:fillColor="#f7a8b8" android:pathData="M44.524,44.524m-43.524,0a43.524,43.524 0,1 1,87.048 0a43.524,43.524 0,1 1,-87.048 0"/>

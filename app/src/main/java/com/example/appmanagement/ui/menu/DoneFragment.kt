@@ -1,3 +1,4 @@
+// Fragment DoneFragment liệt kê các công việc đã hoàn thành và cho phép sắp xếp lại hoặc hoàn tác
 package com.example.appmanagement.ui.menu
 
 import android.os.Bundle

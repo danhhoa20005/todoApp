@@ -1,3 +1,4 @@
+// Fragment OnboardFragment giới thiệu ứng dụng và dẫn người dùng tới bước đăng nhập đầu tiên
 package com.example.appmanagement.ui.onboard
 
 import android.os.Bundle

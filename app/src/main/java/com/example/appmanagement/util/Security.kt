@@ -1,3 +1,4 @@
+// Đối tượng Security gom các hàm mã hóa và kiểm tra mật khẩu bằng thư viện BCrypt
 package com.example.appmanagement.util
 
 import at.favre.lib.crypto.bcrypt.BCrypt

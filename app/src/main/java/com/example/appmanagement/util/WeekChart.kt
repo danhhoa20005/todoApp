@@ -1,3 +1,4 @@
+// Đối tượng WeekChart xử lý thống kê số lượng công việc theo tuần và dựng biểu đồ cột tương ứng
 package com.example.appmanagement.util
 
 import android.animation.ValueAnimator
