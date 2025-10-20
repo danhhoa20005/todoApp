@@ -34,7 +34,7 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE user_id = :userId AND task_date = :date ORDER BY start_time ASC")
     fun getByDate(userId: Long, date: String): LiveData<List<Task>>
 
-    // ===== UPDATE =====
+    // ===== UPDATE =====   
     @Update
     suspend fun update(task: Task): Int
 

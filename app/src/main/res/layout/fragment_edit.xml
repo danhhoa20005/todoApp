@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/editFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/editFragment"
     android:background="@drawable/bg_color">
 
     <!-- Tiêu đề -->
@@ -38,15 +38,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ✅ VÙNG CUỘN: chứa các ô nhập -->
+    <!-- Nút EDIT cố định đáy màn hình -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEditTask"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="Edit Task"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:background="@drawable/bg_button_social"
+        app:cornerRadius="28dp"
+        app:rippleColor="#1FFFFFFF"
+        android:elevation="6dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- VÙNG CUỘN: nằm trên nút, không che nút -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:clipToPadding="false"
         android:paddingBottom="32dp"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/tvDesc"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnEditTask"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -84,7 +105,6 @@
                     android:hint="Enter your task title"
                     android:textColor="@android:color/white"
                     android:textColorHint="#40FFFFFF"
-                    android:background="@android:color/transparent"
                     android:inputType="textCapSentences"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
@@ -114,7 +134,6 @@
                     android:id="@+id/edtDetail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
                     android:hint="Describe your task"
                     android:inputType="textCapSentences|textMultiLine"
                     android:minLines="1"
@@ -150,104 +169,117 @@
                     android:hint="Select date"
                     android:textColor="@android:color/white"
                     android:textColorHint="#40FFFFFF"
-                    android:background="@android:color/transparent"
                     android:inputType="none"
                     android:focusable="false"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- START TIME -->
-            <TextView
-                android:id="@+id/tvLabelStartTime"
+            <!-- TIME: 2 mục trên cùng 1 hàng (label + ô nhập) -->
+            <LinearLayout
+                android:id="@+id/rowTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="START TIME"
-                android:textSize="12sp"
-                android:textColor="#66FFFFFF"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp" />
+                android:orientation="horizontal"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layoutStartTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxBackgroundMode="none"
-                app:hintEnabled="false"
-                android:layout_marginHorizontal="24dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtStartTime"
-                    android:layout_width="match_parent"
+                <!-- START TIME -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Select start time"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#40FFFFFF"
-                    android:background="@android:color/transparent"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-            <!-- END TIME -->
-            <TextView
-                android:id="@+id/tvLabelEndTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="END TIME"
-                android:textSize="12sp"
-                android:textColor="#66FFFFFF"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="16dp" />
+                    <TextView
+                        android:id="@+id/tvStartLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="START TIME:"
+                        android:textSize="12sp"
+                        android:textColor="#66FFFFFF"
+                        android:layout_marginEnd="8dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layoutEndTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxBackgroundMode="none"
-                app:hintEnabled="false"
-                android:layout_marginHorizontal="24dp">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutStartInline"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:boxBackgroundMode="none"
+                        app:hintEnabled="false">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtEndTime"
-                    android:layout_width="match_parent"
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtStartTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Select "
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:textColorHint="#40FFFFFF"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:inputType="none"
+                            android:focusable="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <!-- END TIME -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Select end time"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="#40FFFFFF"
-                    android:background="@android:color/transparent"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/tvEndLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="END TIME:"
+                        android:textSize="12sp"
+                        android:textColor="#66FFFFFF"
+                        android:layout_marginEnd="8dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutEndInline"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:boxBackgroundMode="none"
+                        app:hintEnabled="false">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtEndTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Select "
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:textColorHint="#40FFFFFF"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:inputType="none"
+                            android:focusable="false" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
 
             <!-- TOGGLE DONE -->
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switchCompleted"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Đã hoàn thành"
+                android:text="Status"
                 android:textColor="#40FFFFFF"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="20dp" />
-
-            <!-- NÚT EDIT -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEditTask"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="Edit Task"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:background="@drawable/bg_button_social"
-                app:cornerRadius="28dp"
-                app:rippleColor="#1FFFFFFF"
-                android:elevation="6dp"
                 android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="20dp" />
+
+            <!-- Đệm cuối cho thoáng khi cuộn lên nút -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

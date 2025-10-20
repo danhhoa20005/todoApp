@@ -96,7 +96,7 @@ class HomeFragment : Fragment() {
                 tvEmptyWeek = b.tvEmptyWeek,
                 counts = counts,
                 onBarClick = { onDayClicked(it) },
-                fullScaleCap = 30
+                fullScaleCap = 20
             )
 
             // 3) Cập nhật kết quả tìm kiếm theo text hiện tại
