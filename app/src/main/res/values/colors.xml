@@ -1,5 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <!-- Cơ bản -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Nền ứng dụng -->
+    <color name="bg_dark">#181A20</color>      <!-- Background 01 -->
+    <color name="card_dark">#1F222A</color>    <!-- Background 02 / Surface -->
+
+    <!-- Text -->
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#B0B3B8</color>
+    <color name="text_highlight">#FFD700</color> <!-- số/nhấn -->
+
+    <!-- Tab / Điều hướng -->
+    <color name="tab_inactive">#808080</color>
+    <color name="tab_active">#FFFFFF</color>
+    <color name="tab_blue">#3D7BFF</color>      <!-- PRIMARY từ palette -->
+
+    <!-- Primary / Secondary (theo “Main Colors”) -->
+    <color name="primary">#3D7BFF</color>       <!-- xanh dương chính -->
+    <color name="secondary">#9B6BFF</color>     <!-- tím secondary -->
+
+    <!-- Progress / Accent gradient (tím -> xanh dương) -->
+    <color name="gradient_start">#6B88FF</color>
+    <color name="gradient_end">#9B6BFF</color>
+
+    <!-- Nút + / FAB: xanh dương cùng tông primary -->
+    <color name="fab_blue">#3D7BFF</color>
+
+    <!-- Accent bổ trợ -->
+    <color name="purple_200">#9B6BFF</color>
+    <color name="purple_500">#5A3EA6</color>
+    <color name="purple_700">#37215E</color>
+    <color name="teal_200">#5EEAD4</color>      <!-- mint dịu (Colorful) -->
+    <color name="teal_700">#1B5E5A</color>
+
+    <!-- Trạng thái / biểu đồ tuần -->
+    <color name="selected_color">#4B2F91</color>  <!-- nền khi chọn -->
+    <color name="done_color">#5A3EA6</color>      <!-- track/nền progress -->
+    <color name="weekly_bar">#5A3EA6</color>      <!-- cột thống kê tuần -->
+
+
+
+
+
+
 </resources>

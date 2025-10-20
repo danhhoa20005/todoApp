@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/plashOnboardFragment">
+
+    <!-- Splash -->
+    <fragment
+        android:id="@+id/plashOnboardFragment"
+        android:name="com.example.appmanagement.ui.splash.PlashOnboardFragment"
+        android:label="Splash">
+        <action
+            android:id="@+id/action_plash_to_onboard"
+            app:destination="@id/onboardFragment"
+            app:popUpTo="@id/plashOnboardFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_plashOnboardFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/plashOnboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Onboard -->
+    <fragment
+        android:id="@+id/onboardFragment"
+        android:name="com.example.appmanagement.ui.onboard.OnboardFragment"
+        android:label="Onboard">
+        <action
+            android:id="@+id/action_onboard_to_signEmail"
+            app:destination="@id/signEmailFragment" />
+    </fragment>
+
+    <!-- Đăng nhập -->
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="com.example.appmanagement.ui.login.SignInFragment"
+        android:label="SignIn">
+        <action
+            android:id="@+id/action_signInFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/onboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Nhập email -->
+    <fragment
+        android:id="@+id/signEmailFragment"
+        android:name="com.example.appmanagement.ui.login.SignEmailFragment"
+        android:label="SignEmail">
+        <action
+            android:id="@+id/action_signEmail_to_signIn"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_signEmail_to_signUp"
+            app:destination="@id/signUpFragment" />
+    </fragment>
+
+    <!-- Đăng ký -->
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="com.example.appmanagement.ui.login.SignUpFragment"
+        android:label="SignUp">
+        <action
+            android:id="@+id/action_signUp_to_createWork"
+            app:destination="@id/createWorkFragment"
+            app:popUpTo="@id/signUpFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Tạo thông tin -->
+    <fragment
+        android:id="@+id/createWorkFragment"
+        android:name="com.example.appmanagement.ui.home.CreateWorkFragment"
+        android:label="CreateWork">
+        <action
+            android:id="@+id/action_createWorkFragment_to_onboardFragment"
+            app:destination="@id/onboardFragment" />
+        <action
+            android:id="@+id/action_createWorkFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+        <action
+            android:id="@+id/action_createWorkFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/onboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Home -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.appmanagement.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+
+        <!-- Home -> Done -->
+        <action
+            android:id="@+id/action_homeFragment_to_doneFragment"
+            app:destination="@id/doneFragment" />
+
+        <!-- Home -> Add -->
+        <action
+            android:id="@+id/action_homeFragment_to_addFragment"
+            app:destination="@id/addFragment" />
+
+        <!-- Home -> Calendar (✅ có truyền initialDate) -->
+        <action
+            android:id="@+id/action_homeFragment_to_calendarFragment"
+            app:destination="@id/calendarFragment" />
+
+        <!-- Home -> Clock -->
+        <action
+            android:id="@+id/action_homeFragment_to_clockFragment"
+            app:destination="@id/clockFragment" />
+
+        <!-- Home -> Setting -->
+        <action
+            android:id="@+id/action_homeFragment_to_settingFragment"
+            app:destination="@id/settingFragment" />
+
+        <!-- Home -> Today -->
+        <action
+            android:id="@+id/action_homeFragment_to_todayFragment"
+            app:destination="@id/todayFragment" />
+        <action
+            android:id="@+id/action_homeFragment_self"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+    </fragment>
+
+    <!-- List -->
+    <fragment
+        android:id="@+id/listFragment"
+        android:name="com.example.appmanagement.ui.menu.ListFragment"
+        android:label="List"
+        tools:layout="@layout/fragment_list">
+        <action
+            android:id="@+id/action_listFragment_to_addFragment"
+            app:destination="@id/addFragment" />
+        <action
+            android:id="@+id/action_listFragment_to_editFragment"
+            app:destination="@id/editFragment" />
+    </fragment>
+
+    <!-- Done -->
+    <fragment
+        android:id="@+id/doneFragment"
+        android:name="com.example.appmanagement.ui.menu.DoneFragment"
+        android:label="Done"
+        tools:layout="@layout/fragment_done" />
+
+    <!-- Add -->
+    <fragment
+        android:id="@+id/addFragment"
+        android:name="com.example.appmanagement.ui.menu.AddFragment"
+        android:label="Add"
+        tools:layout="@layout/fragment_add">
+        <action
+            android:id="@+id/action_addFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+
+    <!-- Edit -->
+    <fragment
+        android:id="@+id/editFragment"
+        android:name="com.proptit.room_database.ui.addedit.EditFragment"
+        android:label="Edit"
+        tools:layout="@layout/fragment_edit">
+        <argument
+            android:name="editId"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Calendar -->
+    <fragment
+        android:id="@+id/calendarFragment"
+        android:name="com.example.appmanagement.ui.menu.CalendarFragment"
+        android:label="Calendar"
+        tools:layout="@layout/fragment_calendar">
+
+        <!-- ✅ Nhận ngày khởi tạo (tùy chọn), ví dụ từ Home truyền xuống để auto-select -->
+        <argument
+            android:name="initialDate"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <!-- ✅ Calendar -> DateDetail -->
+        <action
+            android:id="@+id/action_calendarFragment_to_dateDetailFragment"
+            app:destination="@id/dateDetailFragment" />
+    </fragment>
+
+    <!-- Date Detail (hiển thị task theo ngày) -->
+
+
+    <!-- Clock -->
+    <fragment
+        android:id="@+id/clockFragment"
+        android:name="com.example.appmanagement.ui.menu.ClockFragment"
+        android:label="Clock"
+        tools:layout="@layout/fragment_clock" />
+
+    <!-- Setting -->
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.appmanagement.ui.menu.SettingFragment"
+        android:label="Setting"
+        tools:layout="@layout/fragment_setting">
+        <argument
+            android:name="userId"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_settingFragment_to_onboardFragment"
+            app:destination="@id/onboardFragment"
+            app:popUpTo="@id/plashOnboardFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Today -->
+    <fragment
+        android:id="@+id/todayFragment"
+        android:name="com.example.appmanagement.ui.menu.TodayFragment"
+        android:label="Today"
+        tools:layout="@layout/fragment_today" />
+
+</navigation>
