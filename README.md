@@ -127,12 +127,7 @@ app/
 ## 🎥 Video Demo
 
 > 👉 *Video minh họa hoạt động của ứng dụng AppManagement, bao gồm các luồng chính: đăng ký, đăng nhập, tạo – chỉnh sửa công việc, xem thống kê và sử dụng đồng hồ bấm giờ.*
-
-<<<<<<< HEAD
-[![Xem video demo trên YouTube](https://img.shields.io/badge/Xem%20Video%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/your_video_id_here)
-=======
-[![Xem video demo trên YouTube](https://img.shields.io/badge/Xem%20Video%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)]([https://youtu.be/your_video_id_here](https://youtu.be/gbg11kG4aRU))
->>>>>>> FINAL
+https://youtu.be/gbg11kG4aRU
 
 
 ---
