@@ -123,6 +123,22 @@ app/
   * Bấm giờ và tiếp tục Stopwatch
   * Xem biểu đồ thống kê
 
+
+## 🎥 Video Demo
+
+> 👉 *Video minh họa hoạt động của ứng dụng AppManagement, bao gồm các luồng chính: đăng ký, đăng nhập, tạo – chỉnh sửa công việc, xem thống kê và sử dụng đồng hồ bấm giờ.*
+
+[![Xem video demo trên YouTube](https://img.shields.io/badge/Xem%20Video%20Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/your_video_id_here)
+
+
+---
+
+## 📝 Ghi chú  
+- Tất cả tệp nguồn có chú thích tiếng Việt mô tả rõ chức năng.  
+- Khi triển khai thực tế, nên:
+  - Cập nhật `minSdk` và `targetSdk` phù hợp.  
+  - Tối ưu hóa Room (migration, index).  
+  - Kích hoạt ProGuard/R8 khi xuất bản.
 ---
 
 
