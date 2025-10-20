@@ -12,7 +12,7 @@ Toàn bộ mã nguồn được chú thích bằng tiếng Việt (`//` trong co
 
 ## 📅 Thời gian phát triển
 
-* **Bắt đầu:** 01/10/2025
+* **Bắt đầu:** 17/9/2025
 * **Hoàn thiện bản thử nghiệm:** 20/10/2025
 * **Cập nhật gần nhất:** 20/10/2025
 * **Tác giả:** Nguyễn Danh Hòa – sinh viên Học viện Công nghệ Bưu chính Viễn thông (PTIT)
