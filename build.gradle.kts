@@ -1,3 +1,4 @@
+// Tập tin cấu hình Gradle chính khai báo các plugin cấp dự án cần thiết cho ứng dụng
 plugins {
     id("com.android.application") version "8.12.3" apply false
     id("org.jetbrains.kotlin.android") version "2.0.21" apply false

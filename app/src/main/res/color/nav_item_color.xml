@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- // Bộ màu dùng cho trạng thái của biểu tượng trên thanh điều hướng -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Màu khi được chọn -->

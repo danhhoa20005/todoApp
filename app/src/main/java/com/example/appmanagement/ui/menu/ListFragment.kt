@@ -1,3 +1,4 @@
+// Fragment ListFragment hiển thị danh sách công việc chính với kéo thả và điều hướng chỉnh sửa
 package com.example.appmanagement.ui.menu
 
 import android.os.Bundle

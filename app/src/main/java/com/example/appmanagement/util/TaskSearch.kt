@@ -1,3 +1,4 @@
+// Đối tượng TaskSearch cung cấp tiện ích lọc danh sách công việc theo từ khóa người dùng nhập
 package com.example.appmanagement.util
 
 import com.example.appmanagement.data.entity.Task

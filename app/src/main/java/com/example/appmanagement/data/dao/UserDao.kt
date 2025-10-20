@@ -1,3 +1,4 @@
+// Giao diện UserDao khai báo các truy vấn Room phục vụ quản lý người dùng và trạng thái đăng nhập
 package com.example.appmanagement.data.dao
 
 import androidx.lifecycle.LiveData

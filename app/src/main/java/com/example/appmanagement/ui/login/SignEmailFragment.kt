@@ -1,3 +1,4 @@
+// Fragment SignEmailFragment đảm nhận bước nhập email và điều hướng sang đăng nhập hoặc đăng ký
 package com.example.appmanagement.ui.login
 
 import android.os.Bundle

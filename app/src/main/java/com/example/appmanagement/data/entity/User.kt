@@ -1,3 +1,4 @@
+// Định nghĩa thực thể User của Room lưu thông tin người dùng và trạng thái đăng nhập
 package com.example.appmanagement.data.entity
 
 import androidx.room.*

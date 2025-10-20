@@ -1,3 +1,4 @@
+// Tập tin thiết lập dự án định nghĩa kho lưu trữ và các mô-đun được bao gồm
 pluginManagement {
     repositories {
         google()

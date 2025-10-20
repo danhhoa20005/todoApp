@@ -1,3 +1,4 @@
+// Fragment ClockFragment triển khai đồng hồ bấm giờ với chức năng lưu mốc và khôi phục trạng thái
 package com.example.appmanagement.ui.menu
 
 import android.graphics.Color

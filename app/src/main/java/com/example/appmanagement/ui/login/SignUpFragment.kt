@@ -1,3 +1,4 @@
+// Fragment SignUpFragment xử lý màn hình tạo tài khoản mới dựa trên email đã nhập trước đó
 package com.example.appmanagement.ui.login
 
 import android.os.Bundle

@@ -1,3 +1,4 @@
+// Fragment AddFragment cung cấp biểu mẫu tạo công việc mới với kiểm tra ngày giờ chi tiết
 package com.example.appmanagement.ui.menu
 
 import android.app.DatePickerDialog
