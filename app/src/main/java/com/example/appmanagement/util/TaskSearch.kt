@@ -2,9 +2,10 @@ package com.example.appmanagement.util
 
 import com.example.appmanagement.data.entity.Task
 
+// Utilities for searching through task fields using user input
 object TaskSearch {
 
-    /** Lọc danh sách theo chuỗi nhập (title/description/day/start/end). */
+    // Filter tasks whose metadata contains the provided keyword
     fun filter(all: List<Task>, raw: String): List<Task> {
         val key = raw.trim().lowercase()
         if (key.isEmpty()) return emptyList()

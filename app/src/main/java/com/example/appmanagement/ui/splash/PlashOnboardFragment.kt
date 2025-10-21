@@ -7,24 +7,24 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.databinding.FragmentPsplashBinding
+import com.example.appmanagement.util.AppGlobals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-import com.example.appmanagement.util.AppGlobals
-
+// Splash fragment hiển thị ngắn trước khi điều hướng vào app hoặc onboarding
 class PlashOnboardFragment : Fragment() {
 
     private var _binding: FragmentPsplashBinding? = null
     private val binding get() = _binding!!
 
-
-
+    // Tạo view binding cho màn splash
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,6 +34,7 @@ class PlashOnboardFragment : Fragment() {
         return binding.root
     }
 
+    // Chờ ngắn rồi xác định trạng thái đăng nhập để điều hướng phù hợp
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -43,11 +44,10 @@ class PlashOnboardFragment : Fragment() {
             val repo = AccountRepository(AppDatabase.getInstance(requireContext().applicationContext).userDao())
             val currentUser = withContext(Dispatchers.IO) { repo.getCurrentUser() }
 
-
             AppGlobals.isLoggedIn = currentUser != null
             AppGlobals.currentUserId = currentUser?.id
 
-            if (currentUser != null) {            // hoặc if (AppGlobals.isLoggedIn)
+            if (currentUser != null) {
                 when (currentUser.avatarUrl) {
                     "male" -> binding.logo.setImageResource(R.drawable.avatar_male)
                     "female" -> binding.logo.setImageResource(R.drawable.avatar_female)
@@ -57,11 +57,10 @@ class PlashOnboardFragment : Fragment() {
                 binding.tvAPP.text = "'s Manager"
 
                 delay(1000)
-                // pop sạch Splash khỏi back stack cho chắc
                 findNavController().navigate(
                     R.id.homeFragment,
                     null,
-                    androidx.navigation.navOptions {
+                    navOptions {
                         popUpTo(R.id.plashOnboardFragment) { inclusive = true }
                     }
                 )
@@ -74,7 +73,7 @@ class PlashOnboardFragment : Fragment() {
                 findNavController().navigate(
                     R.id.onboardFragment,
                     null,
-                    androidx.navigation.navOptions {
+                    navOptions {
                         popUpTo(R.id.plashOnboardFragment) { inclusive = true }
                     }
                 )
@@ -82,6 +81,7 @@ class PlashOnboardFragment : Fragment() {
         }
     }
 
+    // Giải phóng binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

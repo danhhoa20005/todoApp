@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import com.example.appmanagement.databinding.FragmentClockBinding
 import kotlin.math.floor
 
+// Fragment đồng hồ bấm giờ với tính năng lưu mốc thời gian
 class ClockFragment : Fragment() {
 
     private var _binding: FragmentClockBinding? = null
@@ -32,6 +33,7 @@ class ClockFragment : Fragment() {
         }
     }
 
+    // Khởi tạo view binding cho đồng hồ
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,6 +42,7 @@ class ClockFragment : Fragment() {
         return binding.root
     }
 
+    // Khôi phục trạng thái và thiết lập sự kiện nút bấm
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -60,6 +63,7 @@ class ClockFragment : Fragment() {
         syncToggleButton()
     }
 
+    // Bắt đầu đếm thời gian và cập nhật giao diện liên tục
     private fun startTimer() {
         if (isRunning) return
         isRunning = true
@@ -68,6 +72,7 @@ class ClockFragment : Fragment() {
         syncToggleButton()
     }
 
+    // Tạm dừng và ghi lại mốc thời gian hiện tại
     private fun pauseTimer() {
         if (!isRunning) return
         isRunning = false
@@ -75,7 +80,6 @@ class ClockFragment : Fragment() {
         uiHandler.removeCallbacks(updateRunnable)
         syncToggleButton()
 
-        // Lưu mốc thời gian
         val lapText = binding.elapsedTimeText.text?.toString().orEmpty()
         if (lapText.isNotBlank()) {
             lapCount += 1
@@ -83,6 +87,7 @@ class ClockFragment : Fragment() {
         }
     }
 
+    // Đặt lại đồng hồ về trạng thái ban đầu
     private fun resetTimer() {
         isRunning = false
         startTimeUptime = 0L
@@ -94,6 +99,7 @@ class ClockFragment : Fragment() {
         binding.lapsContainer?.removeAllViews()
     }
 
+    // Cập nhật văn bản hiển thị thời gian đã trôi qua
     private fun updateElapsedTimeText() {
         val elapsed = if (isRunning) {
             elapsedBeforePause + (SystemClock.uptimeMillis() - startTimeUptime)
@@ -109,6 +115,7 @@ class ClockFragment : Fragment() {
         binding.elapsedTimeText.text = String.format("%02d:%02d.%02d", minutes, seconds, centiseconds)
     }
 
+    // Đồng bộ trạng thái nút Start/Pause theo biến isRunning
     private fun syncToggleButton() {
         if (isRunning) {
             binding.toggleButton.text = "Pause"
@@ -119,7 +126,7 @@ class ClockFragment : Fragment() {
         }
     }
 
-    /** Thêm 1 dòng mốc thời gian chuyên nghiệp: Time 01 | 00:30.24 */
+    // Thêm một dòng hiển thị mốc thời gian vào danh sách laps
     private fun addLapRow(index: Int, timeText: String) {
         val ctx = context ?: return
         val container = binding.lapsContainer ?: return
@@ -150,7 +157,6 @@ class ClockFragment : Fragment() {
         row.addView(left, leftParams)
         row.addView(right)
 
-        // Divider mảnh
         val divider = View(ctx).apply {
             setBackgroundColor(Color.parseColor("#22FFFFFF"))
             layoutParams = ViewGroup.LayoutParams(
@@ -164,9 +170,11 @@ class ClockFragment : Fragment() {
         if (container.childCount > 60) container.removeViews(container.childCount - 2, 2)
     }
 
+    // Quy đổi dp sang px theo mật độ màn hình
     private fun dp(v: Int): Int =
         (v * resources.displayMetrics.density).toInt()
 
+    // Ngừng cập nhật khi fragment vào trạng thái onPause
     override fun onPause() {
         super.onPause()
         uiHandler.removeCallbacks(updateRunnable)
@@ -175,6 +183,7 @@ class ClockFragment : Fragment() {
         }
     }
 
+    // Tiếp tục cập nhật khi quay lại fragment
     override fun onResume() {
         super.onResume()
         if (isRunning) {
@@ -186,6 +195,7 @@ class ClockFragment : Fragment() {
         syncToggleButton()
     }
 
+    // Lưu trạng thái đồng hồ khi cấu hình thay đổi
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("isRunning", isRunning)
@@ -194,6 +204,7 @@ class ClockFragment : Fragment() {
         outState.putInt("lapCount", lapCount)
     }
 
+    // Dọn handler và binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         uiHandler.removeCallbacks(updateRunnable)

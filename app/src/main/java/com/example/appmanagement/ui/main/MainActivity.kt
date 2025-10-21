@@ -12,10 +12,12 @@ import com.example.appmanagement.R
 import com.example.appmanagement.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationBarView
 
+// Activity chính chứa NavHost và điều khiển BottomNavigation
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    // Thiết lập điều hướng và xử lý insets khi Activity khởi tạo
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -23,18 +25,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Áp padding cho root theo system bars (status + navigation bar)
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // Lấy NavController từ NavHostFragment
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        // Các màn hình top-level (tức là các tab trong BottomNavigation)
         val topLevelDestinations = setOf(
             R.id.homeFragment,
             R.id.addFragment,
@@ -47,11 +46,9 @@ class MainActivity : AppCompatActivity() {
             R.id.editFragment
         )
 
-        // Gắn NavigationController cho BottomNavigationView
         binding.bottomNav.labelVisibilityMode = NavigationBarView.LABEL_VISIBILITY_LABELED
         binding.bottomNav.setupWithNavController(navController)
 
-        // Ẩn BottomNavigation ở các màn hình không thuộc top-level
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.bottomNav.visibility =
                 if (destination.id in topLevelDestinations) View.VISIBLE else View.GONE

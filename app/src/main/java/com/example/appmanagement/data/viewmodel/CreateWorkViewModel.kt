@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// ViewModel quản lý thông tin người dùng cho màn hình tạo công việc
 class CreateWorkViewModel(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
@@ -19,7 +20,7 @@ class CreateWorkViewModel(
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> get() = _currentUser
 
-    // LiveData lưu trạng thái lưu thành công
+    // LiveData theo dõi trạng thái lưu hồ sơ
     private val _isSaveSuccessful = MutableLiveData(false)
     val isSaveSuccessful: LiveData<Boolean> get() = _isSaveSuccessful
 
@@ -31,10 +32,7 @@ class CreateWorkViewModel(
         }
     }
 
-    // Cập nhật hồ sơ người dùng
-    // avatarKey:
-    // - "male" | "female": lưu đúng key vào DB
-    // - null: giữ nguyên avatarUrl hiện tại (không ghi đè null)
+    // Cập nhật hồ sơ người dùng với tuỳ chọn avatar theo key
     fun updateProfile(name: String, birthDate: String, avatarKey: String?) {
         viewModelScope.launch {
             val current = _currentUser.value ?: withContext(Dispatchers.IO) {
@@ -76,12 +74,12 @@ class CreateWorkViewModel(
         }
     }
 
-    // Reset trạng thái lưu thành công sau khi đã hiển thị thông báo
+    // Reset cờ lưu thành công sau khi hiển thị thông báo
     fun resetSuccess() {
         _isSaveSuccessful.postValue(false)
     }
 
-    // Hàm tạo ViewModel có tham số Repository (dùng cho viewModels factory)
+    // Factory tạo ViewModel với tham số AccountRepository
     companion object {
         fun provideFactory(accountRepository: AccountRepository): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {

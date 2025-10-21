@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.appmanagement.data.entity.Task
 
+// Dao quản lý toàn bộ truy vấn liên quan tới bảng tasks
 @Dao
 interface TaskDao {
 

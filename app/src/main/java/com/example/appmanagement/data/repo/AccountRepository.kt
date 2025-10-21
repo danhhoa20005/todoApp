@@ -4,16 +4,12 @@ import com.example.appmanagement.data.dao.UserDao
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.util.Security
 
-/**
- * Repository trung gian giữa ViewModel ↔ Room (UserDao)
- * Quản lý tài khoản: đăng ký, đăng nhập, đăng xuất, đổi mật khẩu, cập nhật hồ sơ.
- * Mật khẩu được lưu bằng BCrypt hash trong cột "password_hash".
- */
+// Repository quản lý các thao tác tài khoản giữa ViewModel và UserDao
 class AccountRepository(
     private val userDao: UserDao
 ) {
 
-    /** Đăng ký user mới với mật khẩu được băm (hash) */
+    // Đăng ký user mới với mật khẩu được băm và tự động đăng nhập
     suspend fun register(
         name: String,
         email: String,
@@ -42,12 +38,12 @@ class AccountRepository(
             isLoggedIn = true
         )
 
-        // Clear user khác đang login, rồi insert user mới
+        // Xoá trạng thái đăng nhập trước và thêm người dùng mới
         userDao.clearLoggedIn()
         return userDao.insert(newUser)
     }
 
-    /** Đăng nhập: trả về true nếu thành công */
+    // Đăng nhập bằng email và mật khẩu, trả về true nếu thành công
     suspend fun login(email: String, password: String): Boolean {
         val user = userDao.getByEmail(email.trim()) ?: return false
 
@@ -57,7 +53,7 @@ class AccountRepository(
                 Security.verifyPassword(password.toCharArray(), user.passwordHash)
             }
             else -> {
-                // Nếu dữ liệu cũ còn plaintext, so sánh rồi tự động nâng cấp lên hash
+                // Nếu dữ liệu cũ còn plaintext thì so sánh và nâng cấp lên hash
                 val match = user.passwordHash == password
                 if (match) {
                     val newHash = Security.hashPassword(password.toCharArray())
@@ -75,17 +71,17 @@ class AccountRepository(
         return isVerified
     }
 
-    /** Đăng xuất: xóa trạng thái login */
+    // Đăng xuất bằng cách xóa trạng thái đăng nhập
     suspend fun logout() {
         userDao.clearLoggedIn()
     }
 
-    /** Lấy user hiện tại (đang login) */
+    // Lấy người dùng đang đăng nhập hiện tại
     suspend fun getCurrentUser(): User? {
         return userDao.getLoggedInUser()
     }
 
-    /** Cập nhật hồ sơ (tên, ngày sinh, avatar) */
+    // Cập nhật thông tin hồ sơ cơ bản
     suspend fun updateProfile(id: Long, name: String, birthDate: String?, avatarUrl: String?) {
         val user = userDao.getById(id) ?: return
         val updatedUser = user.copy(
@@ -96,7 +92,7 @@ class AccountRepository(
         userDao.update(updatedUser)
     }
 
-    /** Đổi mật khẩu */
+    // Đổi mật khẩu sau khi kiểm tra độ dài tối thiểu
     suspend fun changePassword(userId: Long, newPassword: String) {
         require(newPassword.length >= 6) { "short_password" }
         val hash = Security.hashPassword(newPassword.toCharArray())

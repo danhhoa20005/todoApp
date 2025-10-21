@@ -17,18 +17,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// SignEmailFragment
-// -----------------
-// Mục đích:
-// - Bước nhập email khi đăng nhập/đăng ký.
-// - Kiểm tra email có hợp lệ và có tồn tại trong DB hay không.
-// - Nếu có → chuyển sang SignIn, nếu chưa → chuyển sang SignUp.
-//
+// Bước nhập email kiểm tra tài khoản tồn tại để điều hướng đăng nhập hoặc đăng ký
 class SignEmailFragment : Fragment() {
 
     private var _binding: FragmentSignEmailBinding? = null
     private val binding get() = _binding!!
 
+    // Tạo view binding cho fragment
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -36,15 +31,14 @@ class SignEmailFragment : Fragment() {
         return binding.root
     }
 
+    // Thiết lập sự kiện cho các nút sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Nút back → quay lại màn trước
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
         }
 
-        // Nút Continue → kiểm tra email
         binding.btnContinue.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()
             if (!isValidEmail(email)) {
@@ -52,7 +46,6 @@ class SignEmailFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Kiểm tra email trong DB
             lifecycleScope.launch {
                 val userDao = AppDatabase.getInstance(requireContext()).userDao()
                 val exists = withContext(Dispatchers.IO) {
@@ -62,22 +55,21 @@ class SignEmailFragment : Fragment() {
                 val args = bundleOf("email" to email)
 
                 if (exists) {
-                    // Email đã có → sang màn SignIn
                     findNavController().navigate(R.id.action_signEmail_to_signIn, args)
                 } else {
-                    // Email chưa có → sang màn SignUp
                     findNavController().navigate(R.id.action_signEmail_to_signUp, args)
                 }
             }
         }
     }
 
-    // Hàm validate email (regex từ Android Patterns)
+    // Kiểm tra định dạng email bằng hằng số của Android
     private fun isValidEmail(s: CharSequence?): Boolean =
         !s.isNullOrBlank() && Patterns.EMAIL_ADDRESS.matcher(s).matches()
 
+    // Giải phóng binding để tránh rò rỉ bộ nhớ
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null // tránh leak bộ nhớ
+        _binding = null
     }
 }
