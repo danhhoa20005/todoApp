@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.appmanagement.data.entity.User
 
+// Dao cung cấp thao tác với bảng users và trạng thái đăng nhập
 @Dao
 interface UserDao {
 

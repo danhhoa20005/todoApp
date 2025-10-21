@@ -12,14 +12,16 @@ import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
 import com.example.appmanagement.databinding.FragmentSignUpBinding
 
+// Màn hình đăng ký tài khoản mới dựa trên email đã nhập trước đó
 class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null
     private val binding get() = _binding!!
 
-    // KHÔNG dùng factory
+    // Sử dụng ViewModel mặc định không cần factory
     private val signInViewModel: SignInViewModel by viewModels()
 
+    // Khởi tạo view binding
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -29,6 +31,7 @@ class SignUpFragment : Fragment() {
         return binding.root
     }
 
+    // Thiết lập UI và quan sát kết quả đăng ký
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -62,9 +65,11 @@ class SignUpFragment : Fragment() {
         }
     }
 
+    // Hiển thị thông báo ngắn
     private fun toast(msg: String) =
         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
 
+    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

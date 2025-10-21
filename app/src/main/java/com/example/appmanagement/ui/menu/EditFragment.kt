@@ -17,14 +17,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
+// Fragment chỉnh sửa thông tin công việc hiện có
 class EditFragment : Fragment() {
 
     private var _binding: FragmentEditBinding? = null
     private val binding get() = _binding!!
 
-    // Safe Args: nav_graph cần <argument name="editId" app:argType="long" />
+    // Safe Args truyền id công việc cần chỉnh sửa
     private val args: EditFragmentArgs by navArgs()
 
+    // Khởi tạo view binding cho layout chỉnh sửa
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -34,14 +36,13 @@ class EditFragment : Fragment() {
         return binding.root
     }
 
+    // Nạp dữ liệu task và thiết lập các hành động khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Lấy DB singleton
         val db = AppDatabase.getInstance(requireContext())
         val taskDao = db.taskDao()
 
-        // 1) Nạp task theo id và đổ lên UI
         taskDao.getByIdLive(args.editId).observe(viewLifecycleOwner) { t ->
             t ?: return@observe
             binding.edtTitle.setText(t.title)
@@ -49,25 +50,20 @@ class EditFragment : Fragment() {
             binding.edtDate.setText(t.taskDate)
             binding.edtStartTime.setText(t.startTime)
             binding.edtEndTime.setText(t.endTime)
-
-            // ✅ Gắn trạng thái hoàn thành vào switch
             binding.switchCompleted.isChecked = t.isCompleted
-            // (màu chữ của switch đã set cố định #40FFFFFF trong XML nên không cần code)
         }
 
-        // 2) Pickers
         binding.edtDate.setOnClickListener { showDatePicker() }
         binding.edtStartTime.setOnClickListener { showTimePicker(isStart = true) }
         binding.edtEndTime.setOnClickListener { showTimePicker(isStart = false) }
 
-        // 3) Lưu cập nhật
         binding.btnEditTask.setOnClickListener {
             val title = binding.edtTitle.text?.toString()?.trim().orEmpty()
             val detail = binding.edtDetail.text?.toString()?.trim().orEmpty()
             val date = binding.edtDate.text?.toString()?.trim().orEmpty()
             val start = binding.edtStartTime.text?.toString()?.trim().orEmpty()
             val end = binding.edtEndTime.text?.toString()?.trim().orEmpty()
-            val completed = binding.switchCompleted.isChecked  // ✅ lấy trạng thái từ switch
+            val completed = binding.switchCompleted.isChecked
 
             if (title.isBlank()) {
                 binding.edtTitle.error = "Vui lòng nhập tiêu đề"
@@ -86,7 +82,7 @@ class EditFragment : Fragment() {
                     taskDate = date,
                     startTime = start,
                     endTime = end,
-                    isCompleted = completed   // ✅ LƯU trạng thái hoàn thành
+                    isCompleted = completed
                 )
                 taskDao.update(updated)
                 withContext(Dispatchers.Main) { findNavController().navigateUp() }
@@ -94,13 +90,13 @@ class EditFragment : Fragment() {
         }
     }
 
+    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-
-
+    // Hiển thị DatePicker để người dùng chọn ngày
     private fun showDatePicker() {
         val c = Calendar.getInstance()
         DatePickerDialog(
@@ -114,6 +110,7 @@ class EditFragment : Fragment() {
         ).show()
     }
 
+    // Hiển thị TimePicker cho giờ bắt đầu hoặc kết thúc
     private fun showTimePicker(isStart: Boolean) {
         val c = Calendar.getInstance()
         TimePickerDialog(

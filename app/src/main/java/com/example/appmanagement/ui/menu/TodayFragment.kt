@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+// Danh sách công việc trong ngày hiện tại với khả năng kéo thả sắp xếp
 class TodayFragment : Fragment() {
 
     private var _binding: FragmentTodayBinding? = null
@@ -32,10 +33,10 @@ class TodayFragment : Fragment() {
     private lateinit var taskRepo: TaskRepository
     private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    // trạng thái kéo & animator gốc
     private var isDragging = false
     private var originalAnimator: RecyclerView.ItemAnimator? = null
 
+    // Khởi tạo binding cho layout danh sách hôm nay
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,6 +45,7 @@ class TodayFragment : Fragment() {
         return binding.root
     }
 
+    // Thiết lập adapter, kéo thả và quan sát task trong ngày
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -71,11 +73,10 @@ class TodayFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = taskAdapter
             setHasFixedSize(true)
-            setItemViewCacheSize(8) // tuỳ chọn: giảm rebind
+            setItemViewCacheSize(8)
             originalAnimator = itemAnimator
         }
 
-        // Kéo–thả sắp xếp + lưu order_index
         val touchCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
         ) {
@@ -85,10 +86,10 @@ class TodayFragment : Fragment() {
                 super.onSelectedChanged(vh, actionState)
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     isDragging = true
-                    binding.rvTasks.itemAnimator = null // tắt animator để mượt khi kéo
+                    binding.rvTasks.itemAnimator = null
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
                     isDragging = false
-                    binding.rvTasks.itemAnimator = originalAnimator // bật lại khi thả
+                    binding.rvTasks.itemAnimator = originalAnimator
                 }
             }
 
@@ -101,8 +102,8 @@ class TodayFragment : Fragment() {
                 val to = target.bindingAdapterPosition
                 if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false
 
-                taskAdapter.swapItems(from, to)          // đổi trong working list
-                taskAdapter.notifyItemMoved(from, to)    // UI trượt theo tay
+                taskAdapter.swapItems(from, to)
+                taskAdapter.notifyItemMoved(from, to)
                 return true
             }
 
@@ -110,7 +111,6 @@ class TodayFragment : Fragment() {
 
             override fun clearView(rv: RecyclerView, vh: RecyclerView.ViewHolder) {
                 super.clearView(rv, vh)
-                // lưu thứ tự mới từ working list
                 val pairs = taskAdapter.snapshotIdsWithIndex()
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepo.updateOrderMany(pairs)
@@ -121,24 +121,23 @@ class TodayFragment : Fragment() {
 
         val today = df.format(Calendar.getInstance().time)
 
-        // Lấy task NGÀY HÔM NAY theo user hiện tại
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { accountRepo.getCurrentUser() } ?: return@launch
             taskRepo.byDate(user.id, today).observe(viewLifecycleOwner) { tasks ->
-                // Sắp xếp: chưa hoàn thành trước → orderIndex tăng → id giảm
                 val sorted = tasks.sortedWith(
                     compareBy<com.example.appmanagement.data.entity.Task> { it.isCompleted }
                         .thenBy { it.orderIndex }
                         .thenByDescending { it.id }
                 )
                 if (!isDragging) {
-                    taskAdapter.submitList(sorted)   // KHÔNG cập nhật khi đang kéo
+                    taskAdapter.submitList(sorted)
                     if (sorted.isNotEmpty()) binding.rvTasks.scrollToPosition(0)
                 }
             }
         }
     }
 
+    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

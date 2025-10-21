@@ -13,21 +13,25 @@ import com.example.appmanagement.databinding.ItemTaskBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
+// RecyclerView adapter quản lý danh sách công việc với thao tác chọn và kéo thả
 class TaskAdapter(
     private val onEditClick: (Task) -> Unit,
     private val onDeleteClick: (Task) -> Unit,
     private val onCheckClick: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
+    // Bộ nhớ tạm cho danh sách hiện tại
     private val items = mutableListOf<Task>()
+    // Id item đang được chọn để đổi màu nền
     private var selectedId: Long? = null
+    // Hỗ trợ kéo thả từ bên ngoài
     var dragHelper: ItemTouchHelper? = null
 
     init { setHasStableIds(true) }
     override fun getItemId(position: Int) = items[position].id
     override fun getItemCount(): Int = items.size
 
-    /* ----- DiffUtil để cập nhật mượt ----- */
+    // DiffUtil để so sánh danh sách cũ và mới
     private class TaskDiff(
         private val old: List<Task>,
         private val new: List<Task>
@@ -40,9 +44,8 @@ class TaskAdapter(
             old[oldPos] == new[newPos]
     }
 
-    /** NẠP DỮ LIỆU (thay cho submitDataOnce): luôn diff & refresh */
+    // Cập nhật danh sách và xử lý trạng thái chọn hiện tại
     fun submitList(list: List<Task>) {
-        // Nếu item đang chọn không còn trong danh sách mới thì bỏ chọn
         if (selectedId != null && list.none { it.id == selectedId }) selectedId = null
         val diff = DiffUtil.calculateDiff(TaskDiff(items, list))
         items.clear()
@@ -50,13 +53,14 @@ class TaskAdapter(
         diff.dispatchUpdatesTo(this)
     }
 
-    /* chỉ đổi thứ tự trong working list; notifyItemMoved() gọi ở Fragment nếu cần */
+    // Đổi chỗ hai phần tử trong danh sách tạm khi kéo thả
     fun swapItems(from: Int, to: Int) {
         if (from == to) return
         val t = items.removeAt(from)
         items.add(to, t)
     }
 
+    // Lấy ảnh chụp của id và vị trí để lưu thứ tự
     fun snapshotIdsWithIndex(): List<Pair<Long, Int>> =
         items.mapIndexed { i, t -> t.id to i }
 
@@ -69,11 +73,14 @@ class TaskAdapter(
         h.bind(items[i])
     }
 
+    // ViewHolder hiển thị thông tin từng công việc
     inner class TaskViewHolder(private val b: ItemTaskBinding) :
         RecyclerView.ViewHolder(b.root) {
 
+        // Định dạng ngày tạo công việc
         private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
+        // Gán dữ liệu và xử lý sự kiện cho item
         fun bind(t: Task) {
             b.tvTitle.text = t.title
             b.tvDetail.text = t.description
@@ -99,7 +106,7 @@ class TaskAdapter(
             }
             b.btnCheck.setOnClickListener { onCheckClick(t) }
 
-            // chọn item để đổi màu
+            // Nhấn chọn để đổi màu item
             b.root.setOnClickListener {
                 val oldId = selectedId
                 selectedId = t.id
@@ -112,7 +119,7 @@ class TaskAdapter(
                 if (newPos != RecyclerView.NO_POSITION) notifyItemChanged(newPos)
             }
 
-            // Long-press để kéo thả
+            // Nhấn giữ để kích hoạt kéo thả
             b.cardTask.isLongClickable = true
             b.cardTask.setOnLongClickListener {
                 dragHelper?.startDrag(this)
@@ -120,6 +127,7 @@ class TaskAdapter(
             }
         }
 
+        // Ghép chuỗi thời gian hiển thị cho item
         private fun buildTimeRange(s: String, e: String): String {
             val a = s.trim(); val b2 = e.trim()
             return when {

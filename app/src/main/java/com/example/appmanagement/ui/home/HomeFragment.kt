@@ -20,7 +20,8 @@ import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentHomeBinding
 import com.example.appmanagement.ui.menu.TaskAdapter
-import com.example.appmanagement.util.*
+import com.example.appmanagement.util.WeekChart
+import com.example.appmanagement.util.toDateOrNull
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
 
+// Màn hình chính hiển thị thống kê và tìm kiếm công việc
 class HomeFragment : Fragment() {
 
     private var _b: FragmentHomeBinding? = null
@@ -37,6 +39,7 @@ class HomeFragment : Fragment() {
     private lateinit var vm: TaskViewModel
     private lateinit var searchAdapter: TaskAdapter
 
+    // Khởi tạo binding và lấy TaskViewModel dùng chung với Activity
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -47,6 +50,7 @@ class HomeFragment : Fragment() {
         return b.root
     }
 
+    // Thiết lập giao diện, tải dữ liệu người dùng và quan sát danh sách công việc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,7 +63,6 @@ class HomeFragment : Fragment() {
         val db = AppDatabase.getInstance(requireContext())
         val repo = AccountRepository(db.userDao())
 
-        // Hiển thị user + avatar (đọc từ repo; có thể chuyển sang observe trong VM nếu muốn realtime)
         viewLifecycleOwner.lifecycleScope.launch {
             val u = withContext(Dispatchers.IO) { repo.getCurrentUser() }
             if (u != null) {
@@ -80,14 +83,9 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // Quan sát tất cả task để cập nhật thống kê + search
         vm.tasksAll.observe(viewLifecycleOwner) { list ->
             val data = list.orEmpty()
-
-            // 1) Thống kê hôm nay
             applyTodayStats(data)
-
-            // 2) Biểu đồ tuần
             val counts = WeekChart.computeWeekCounts(data)
             WeekChart.render(
                 rowBars = b.rowBars,
@@ -101,29 +99,17 @@ class HomeFragment : Fragment() {
                 onBarClick = { onDayClicked(it) },
                 fullScaleCap = 20
             )
-
-            // 3) Cập nhật kết quả tìm kiếm theo text hiện tại
             submitSearch(data, b.etSearch.text?.toString().orEmpty())
         }
 
-        // ↓↓↓ BỎ: Home không tự lọc theo ngày, để ViewModel cung cấp "all"
-        // vm.filterByDate(toDayString())
-
-        // Adapter danh sách tìm kiếm
         searchAdapter = TaskAdapter(
             onEditClick = { task ->
                 findNavController().navigate(
                     HomeFragmentDirections.actionHomeFragmentToEditFragment(task.id)
                 )
             },
-            onDeleteClick = { task ->
-                // chuyển về ViewModel để đảm bảo đúng userId
-                vm.deleteTask(task)
-            },
-            onCheckClick = { task ->
-                // chuyển về ViewModel để đảm bảo đúng userId
-                vm.toggleTask(task)
-            }
+            onDeleteClick = { task -> vm.deleteTask(task) },
+            onCheckClick = { task -> vm.toggleTask(task) }
         )
 
         b.rvSearchResults.apply {
@@ -133,7 +119,6 @@ class HomeFragment : Fragment() {
             setItemViewCacheSize(8)
         }
 
-        // Tìm kiếm động
         b.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
@@ -142,7 +127,6 @@ class HomeFragment : Fragment() {
             }
         })
 
-        // Điều hướng nhanh
         b.cardCompleted.setOnClickListener {
             findNavController().navigate(R.id.action_homeFragment_to_doneFragment)
         }
@@ -150,7 +134,6 @@ class HomeFragment : Fragment() {
             findNavController().navigate(R.id.action_homeFragment_to_todayFragment)
         }
 
-        // Back = thoát app
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -159,12 +142,13 @@ class HomeFragment : Fragment() {
         )
     }
 
-    // Nếu bạn KHÔNG clear ViewModel khi logout, nên nạp lại user ở đây
+    // Đảm bảo reload người dùng khi quay lại màn hình
     override fun onResume() {
         super.onResume()
         vm.reloadCurrentUser()
     }
 
+    // Hiển thị hoặc ẩn các thẻ thống kê và danh sách tìm kiếm
     private fun showCards(show: Boolean) {
         b.cardProgress.isVisible = show
         b.cardWeek.isVisible = show
@@ -172,10 +156,10 @@ class HomeFragment : Fragment() {
         b.rvSearchResults.isVisible = !show
     }
 
+    // Cập nhật kết quả tìm kiếm theo từ khoá nhập vào
     private fun submitSearch(all: List<Task>, raw: String) {
         val key = raw.trim().lowercase(Locale.getDefault())
         if (key.isEmpty()) {
-            // ĐỔI: submitDataOnce -> submitList để luôn refresh
             searchAdapter.submitList(emptyList())
             showCards(true)
             return
@@ -190,12 +174,11 @@ class HomeFragment : Fragment() {
             t.contains(key) || d.contains(key) || day.contains(key) || s.contains(key) || e.contains(key)
         }
 
-        // ĐỔI: submitDataOnce -> submitList
         searchAdapter.submitList(filtered)
         showCards(false)
     }
 
-    /** Thống kê hôm nay + tổng đã hoàn thành */
+    // Tính toán thống kê cho hôm nay và tổng công việc hoàn thành
     private fun applyTodayStats(all: List<Task>) {
         val today = LocalDate.now()
         val todayTasks = all.filter { it.taskDate.toDateOrNull() == today }
@@ -213,10 +196,12 @@ class HomeFragment : Fragment() {
         b.tvCompleted.text = doneTotal.toString()
     }
 
+    // Xử lý khi người dùng chạm vào cột trong biểu đồ tuần
     private fun onDayClicked(index: Int) {
-        // Điều hướng theo ngày nếu cần
+        // Chưa có điều hướng cụ thể, để trống cho tương lai
     }
 
+    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _b = null

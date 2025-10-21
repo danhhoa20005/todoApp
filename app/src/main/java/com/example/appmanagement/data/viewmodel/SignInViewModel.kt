@@ -11,21 +11,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// ViewModel xử lý luồng đăng nhập và đăng ký tài khoản
 class SignInViewModel(app: Application) : AndroidViewModel(app) {
 
-    // Data layer
+    // Truy cập tầng dữ liệu
     private val database by lazy { AppDatabase.getInstance(app) }
     private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
-    // Login result: true = success, false = failure
+    // Kết quả đăng nhập: true thành công, false thất bại
     private val _loginResult = MutableLiveData<Boolean>()
     val loginResult: LiveData<Boolean> get() = _loginResult
 
-    // Register result: "ok" | "email_exists" | "invalid" | "failed"
+    // Kết quả đăng ký: ok, email_exists, invalid, failed
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> get() = _registerResult
 
-    /** Login with email & password (repository verifies with BCrypt). */
+    // Đăng nhập với email và mật khẩu, repository sẽ kiểm tra BCrypt
     fun login(email: String, password: String) {
         val e = email.trim()
         val p = password.trim()
@@ -42,7 +43,7 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Register a new user (repository hashes password internally). */
+    // Đăng ký người dùng mới, repository tự băm mật khẩu
     fun register(name: String, email: String, password: String) {
         val n = name.trim()
         val e = email.trim()
@@ -59,7 +60,7 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
                     accountRepository.register(n, e, p)
                     "ok"
                 } catch (ise: IllegalStateException) {
-                    // From repository: "email_exists" or "invalid_input"
+                    // Repository trả về email_exists hoặc invalid_input
                     when (ise.message) {
                         "email_exists"  -> "email_exists"
                         "invalid_input" -> "invalid"

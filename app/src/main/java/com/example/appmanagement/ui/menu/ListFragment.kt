@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// Danh sách toàn bộ công việc với khả năng kéo thả sắp xếp thứ tự
 class ListFragment : Fragment() {
 
     private var _binding: FragmentListBinding? = null
@@ -26,10 +27,10 @@ class ListFragment : Fragment() {
     private lateinit var taskAdapter: TaskAdapter
     private lateinit var taskRepo: TaskRepository
 
-    // thêm
     private var isDragging = false
     private var originalAnimator: RecyclerView.ItemAnimator? = null
 
+    // Khởi tạo binding cho layout danh sách
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,6 +39,7 @@ class ListFragment : Fragment() {
         return binding.root
     }
 
+    // Thiết lập adapter, kéo thả và quan sát dữ liệu task
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -63,11 +65,10 @@ class ListFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = taskAdapter
             setHasFixedSize(true)
-            setItemViewCacheSize(8) // tuỳ chọn: giảm rebind
+            setItemViewCacheSize(8)
             originalAnimator = itemAnimator
         }
 
-        // ItemTouchHelper: kéo–thả, lưu order_index khi thả
         val touchCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
         ) {
@@ -77,11 +78,9 @@ class ListFragment : Fragment() {
                 super.onSelectedChanged(vh, actionState)
                 if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
                     isDragging = true
-                    // tắt animator để tránh khựng khi kéo dài
                     binding.rvTasks.itemAnimator = null
                 } else if (actionState == ItemTouchHelper.ACTION_STATE_IDLE) {
                     isDragging = false
-                    // bật lại animator sau khi thả
                     binding.rvTasks.itemAnimator = originalAnimator
                 }
             }
@@ -94,9 +93,7 @@ class ListFragment : Fragment() {
                 val from = vh.bindingAdapterPosition
                 val to = target.bindingAdapterPosition
 
-                // đổi thứ tự trong working list của adapter
                 taskAdapter.swapItems(from, to)
-                // báo UI trượt theo tay
                 taskAdapter.notifyItemMoved(from, to)
                 return true
             }
@@ -105,7 +102,6 @@ class ListFragment : Fragment() {
 
             override fun clearView(rv: RecyclerView, vh: RecyclerView.ViewHolder) {
                 super.clearView(rv, vh)
-                // Lưu thứ tự mới về DB từ working list
                 val pairs = taskAdapter.snapshotIdsWithIndex()
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepo.updateOrderMany(pairs)
@@ -116,13 +112,11 @@ class ListFragment : Fragment() {
         helper.attachToRecyclerView(binding.rvTasks)
         taskAdapter.dragHelper = helper
 
-        // Quan sát danh sách đã sắp xếp từ Repo/DAO
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { accountRepo.getCurrentUser() }
             user?.let {
                 taskRepo.all(it.id).observe(viewLifecycleOwner) { tasks ->
                     if (!isDragging) {
-                        // đồng bộ một lần mỗi khi DB thay đổi – KHÔNG gọi trong lúc kéo
                         taskAdapter.submitList(tasks)
                     }
                 }
@@ -130,6 +124,7 @@ class ListFragment : Fragment() {
         }
     }
 
+    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

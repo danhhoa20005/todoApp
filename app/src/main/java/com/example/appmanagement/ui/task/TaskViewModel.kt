@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// ViewModel nhẹ cho tầng UI tái sử dụng lại repository chung
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database by lazy { AppDatabase.getInstance(application) }
@@ -36,10 +37,10 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
     val tasksByDate: LiveData<List<Task>> get() = _tasksByDate
 
     init {
-        // 1) Nạp user đăng nhập hiện tại
+        // Nạp user đăng nhập hiện tại
         loadCurrentUser()
 
-        // 2) Khi có userId -> gắn nguồn dữ liệu
+        // Khi có userId thì gắn nguồn dữ liệu tương ứng
         _tasksAll.addSource(currentUserId) { uid ->
             _tasksAll.value = emptyList()
             if (uid != null) {
@@ -63,15 +64,16 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 _tasksDone.addSource(src) { _tasksDone.value = it }
             }
         }
-        // _tasksByDate gắn nguồn khi filterByDate(...)
+        // tasksByDate sẽ gắn nguồn khi filterByDate được gọi
     }
 
+    // Tải user hiện tại từ repository
     private fun loadCurrentUser() = viewModelScope.launch {
         val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
         currentUserId.value = user?.id
     }
 
-    /** Lọc theo ngày */
+    // Lọc danh sách theo ngày cụ thể
     fun filterByDate(date: String) {
         val uid = currentUserId.value ?: run {
             _tasksByDate.value = emptyList()
@@ -82,7 +84,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         _tasksByDate.addSource(source) { _tasksByDate.value = it }
     }
 
-    /** Thêm Task */
+    // Thêm công việc mới cho user hiện tại
     fun addTask(
         title: String,
         description: String,
@@ -94,17 +96,17 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         taskRepository.add(uid, title, description, taskDate, startTime, endTime)
     }
 
-    /** Cập nhật Task */
+    // Cập nhật thông tin công việc
     fun updateTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.update(task)
     }
 
-    /** Xoá Task */
+    // Xoá công việc
     fun deleteTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.delete(task)
     }
 
-    /** Đổi trạng thái hoàn thành */
+    // Đổi trạng thái hoàn thành
     fun toggleTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.toggle(task)
     }
