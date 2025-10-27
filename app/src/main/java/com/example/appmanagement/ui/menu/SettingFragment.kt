@@ -13,6 +13,7 @@ import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.databinding.FragmentSettingBinding
 import com.example.appmanagement.util.AppGlobals
+import com.example.appmanagement.util.ThemePreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -73,6 +74,15 @@ class SettingFragment : Fragment() {
 
         b.btnBack.setOnClickListener { findNavController().navigateUp() }
 
+        val isDarkMode = ThemePreferences.isDarkMode(requireContext())
+        b.switchMode.isChecked = isDarkMode
+        updateModeLabel(isDarkMode)
+
+        b.switchMode.setOnCheckedChangeListener { _, checked ->
+            ThemePreferences.updateDarkMode(requireContext(), checked)
+            updateModeLabel(checked)
+        }
+
         b.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
@@ -97,5 +107,10 @@ class SettingFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun updateModeLabel(isDark: Boolean) {
+        val labelRes = if (isDark) R.string.dark_mode_label else R.string.light_mode_label
+        b.tvModeLabel.text = getString(labelRes)
     }
 }
