@@ -1,54 +1,58 @@
 package com.example.appmanagement.data.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.DayOfWeek
-import java.time.LocalDate
+import kotlinx.coroutines.*
+import java.time.*
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
-// ViewModel quản lý danh sách công việc và dữ liệu biểu đồ theo người dùng
+/**
+ * ViewModel quản lý dữ liệu công việc (Task)
+ * Chịu trách nhiệm trung gian giữa UI ↔ Repository
+ * - Kết nối Room Database (TaskDao, UserDao)
+ * - Cung cấp LiveData cho giao diện (UI quan sát thay đổi)
+ * - Thực hiện các thao tác CRUD (thêm, sửa, xóa, lọc, thống kê)
+ */
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val database by lazy { AppDatabase.getInstance(application) }
-    private val taskRepository by lazy { TaskRepository(database.taskDao()) }
-    private val accountRepository by lazy { AccountRepository(database.userDao()) }
+    /* ------------------ KẾT NỐI DATABASE & REPOSITORY ------------------ */
 
-    // Lưu id người dùng hiện tại
-    private val currentUserId = MutableLiveData<Long?>()
+    private val database by lazy { AppDatabase.getInstance(application) }          // Lấy thể hiện DB
+    private val taskRepository by lazy { TaskRepository(database.taskDao()) }      // Repo công việc
+    private val accountRepository by lazy { AccountRepository(database.userDao()) } // Repo người dùng
 
-    // Dữ liệu công khai cho UI
-    private val _tasksAll = MediatorLiveData<List<Task>>()
+    /* ------------------ QUẢN LÝ USER ĐANG ĐĂNG NHẬP ------------------ */
+
+    private val currentUserId = MutableLiveData<Long?>()  // Lưu id người dùng hiện tại (null nếu chưa login)
+
+    /* ------------------ LIVE DATA CHO CÁC LOẠI DANH SÁCH ------------------ */
+
+    private val _tasksAll = MediatorLiveData<List<Task>>()   // tất cả task
     val tasksAll: LiveData<List<Task>> get() = _tasksAll
 
-    private val _tasksTodo = MediatorLiveData<List<Task>>()
+    private val _tasksTodo = MediatorLiveData<List<Task>>()  // task chưa hoàn thành
     val tasksTodo: LiveData<List<Task>> get() = _tasksTodo
 
-    private val _tasksDone = MediatorLiveData<List<Task>>()
+    private val _tasksDone = MediatorLiveData<List<Task>>()  // task đã hoàn thành
     val tasksDone: LiveData<List<Task>> get() = _tasksDone
 
-    private val _tasksByDate = MediatorLiveData<List<Task>>()
+    private val _tasksByDate = MediatorLiveData<List<Task>>() // task theo ngày cụ thể
     val tasksByDate: LiveData<List<Task>> get() = _tasksByDate
 
-    // Dữ liệu cho biểu đồ tuần
-    private val _weekCounts = MediatorLiveData<IntArray>()
+    /* ------------------ DỮ LIỆU BIỂU ĐỒ TUẦN ------------------ */
+
+    private val _weekCounts = MediatorLiveData<IntArray>()    // số task hoàn thành [Mon..Sun]
     val weekCounts: LiveData<IntArray> get() = _weekCounts
 
-    private val _weekPercents = MediatorLiveData<IntArray>()
+    private val _weekPercents = MediatorLiveData<IntArray>()  // tỉ lệ % hoàn thành theo ngày
     val weekPercents: LiveData<IntArray> get() = _weekPercents
 
-    // Giữ nguồn hiện tại để tháo ra khi đổi user
+    /* ------------------ NGUỒN DỮ LIỆU ĐỘNG (để removeSource chính xác) ------------------ */
     private var allSource: LiveData<List<Task>>? = null
     private var todoSource: LiveData<List<Task>>? = null
     private var doneSource: LiveData<List<Task>>? = null
@@ -56,20 +60,22 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+    /* ------------------ KHỞI TẠO VIEWMODEL ------------------ */
     init {
-        // Tự động nạp user hiện tại khi ViewModel được tạo
+        // 1️⃣ Nạp user hiện tại khi ViewModel được tạo
         loadCurrentUser()
 
-        // Theo dõi userId để cập nhật nguồn dữ liệu tương ứng
+        // 2️⃣ Quan sát currentUserId → thay đổi dữ liệu theo user
         _tasksAll.addSource(currentUserId) { uid ->
             _tasksAll.value = emptyList()
             allSource?.let { _tasksAll.removeSource(it) }
+
             if (uid != null) {
-                val src = taskRepository.all(uid)
+                val src = taskRepository.all(uid)   // lấy danh sách task của user
                 allSource = src
                 _tasksAll.addSource(src) { list ->
                     _tasksAll.value = list
-                    computeWeeklySeries(list.orEmpty())
+                    computeWeeklySeries(list.orEmpty()) // cập nhật dữ liệu biểu đồ tuần
                 }
             } else {
                 computeWeeklySeries(emptyList())
@@ -95,30 +101,35 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
                 _tasksDone.addSource(src) { _tasksDone.value = it }
             }
         }
-        // tasksByDate sẽ được gắn nguồn khi gọi filterByDate
+        // _tasksByDate sẽ gắn khi gọi filterByDate()
     }
 
-    // Lấy thông tin người dùng hiện tại thông qua AccountRepository
+    /* ------------------ HÀM NỘI BỘ ------------------ */
+
+    /** Nạp user hiện tại (lấy từ AccountRepository) */
     private fun loadCurrentUser() = viewModelScope.launch {
         val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
         currentUserId.value = user?.id
     }
 
-    // Cho phép màn hình yêu cầu tải lại người dùng sau khi đăng nhập
+    /** Cho phép màn hình gọi lại khi người dùng login/logout */
     fun reloadCurrentUser() = loadCurrentUser()
 
-    // Lọc danh sách theo ngày cụ thể dựa trên user hiện tại
+    /** Lọc công việc theo ngày (date format "dd/MM/yyyy") */
     fun filterByDate(date: String) {
         val uid = currentUserId.value
         _tasksByDate.value = emptyList()
         byDateSource?.let { _tasksByDate.removeSource(it) }
+
         if (uid == null) return
         val src = taskRepository.byDate(uid, date)
         byDateSource = src
         _tasksByDate.addSource(src) { _tasksByDate.value = it }
     }
 
-    // Thêm công việc mới gắn với user đang đăng nhập
+    /* ------------------ HÀM THAO TÁC VỚI CÔNG VIỆC ------------------ */
+
+    /** Thêm task mới cho user hiện tại */
     fun addTask(
         title: String,
         description: String,
@@ -130,39 +141,43 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         taskRepository.add(uid, title, description, taskDate, startTime, endTime)
     }
 
-    // Cập nhật thông tin công việc
+    /** Cập nhật thông tin task */
     fun updateTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.update(task)
     }
 
-    // Xoá công việc khỏi danh sách
+    /** Xóa task */
     fun deleteTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.delete(task)
     }
 
-    // Đổi trạng thái hoàn thành của một công việc
+    /** Đổi trạng thái hoàn thành (done ↔ todo) */
     fun toggleTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.toggle(task)
     }
 
-    // Tính toán dữ liệu biểu đồ tuần dựa trên danh sách hiện tại
+    /* ------------------ XỬ LÝ DỮ LIỆU BIỂU ĐỒ TUẦN ------------------ */
+
+    /** Tính toán dữ liệu biểu đồ tuần: số lượng + % hoàn thành theo ngày */
     private fun computeWeeklySeries(all: List<Task>) {
         val counts = countCompletedLast7DaysByDow(all)
         _weekCounts.value = counts
         _weekPercents.value = countsToPercents(counts, capPerDay = 20)
     }
 
-    // Đếm số công việc hoàn thành trong 7 ngày gần nhất theo thứ trong tuần
+    /** Đếm số task hoàn thành trong 7 ngày gần nhất theo thứ (Mon..Sun) */
     private fun countCompletedLast7DaysByDow(all: List<Task>): IntArray {
         val today = LocalDate.now()
         val start = today.minusDays(6)
         val byDay = IntArray(7) { 0 }
 
         all.forEach { task ->
-            if (!task.isCompleted) return@forEach
+            if (!task.isCompleted) return@forEach   // chỉ tính task đã hoàn thành
             val date = runCatching { LocalDate.parse(task.taskDate, dateFormatter) }.getOrNull()
                 ?: return@forEach
             if (date.isBefore(start) || date.isAfter(today)) return@forEach
+
+            // Cộng vào đúng thứ trong tuần
             when (date.dayOfWeek) {
                 DayOfWeek.MONDAY    -> byDay[0]++
                 DayOfWeek.TUESDAY   -> byDay[1]++
@@ -176,11 +191,11 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         return byDay
     }
 
-    // Chuyển số lượng công việc sang phần trăm dựa trên ngưỡng tối đa mỗi ngày
+    /** Chuyển số lượng task hoàn thành sang % hiển thị trong biểu đồ */
     private fun countsToPercents(counts: IntArray, capPerDay: Int): IntArray {
         return IntArray(7) { i ->
-            val clamped = counts[i].coerceAtMost(capPerDay)
-            (clamped * 100f / capPerDay).roundToInt()
+            val clamped = counts[i].coerceAtMost(capPerDay) // giới hạn tối đa 1 ngày
+            (clamped * 100f / capPerDay).roundToInt()       // đổi sang %
         }
     }
 }

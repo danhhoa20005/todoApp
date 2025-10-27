@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:color="@color/nav_active" />
-    <item android:state_checked="false" android:color="@color/nav_inactive" />
+
+    <!-- Màu khi được chọn -->
+    <item android:color="#D1C4E9" android:state_checked="true"/>
+
+    <!-- Màu khi không chọn -->
+    <item android:color="#A5A5A5" android:state_checked="false"/>
+
 </selector>

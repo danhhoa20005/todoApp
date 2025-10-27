@@ -6,19 +6,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.databinding.FragmentSettingBinding
-import com.example.appmanagement.util.AppGlobals
-import com.example.appmanagement.util.ThemePreferences
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.lifecycle.lifecycleScope
+import com.example.appmanagement.util.AppGlobals
 
-// Màn hình cài đặt hiển thị thông tin người dùng và xử lý đăng xuất
+import kotlinx.coroutines.launch
+
 class SettingFragment : Fragment() {
 
     private var _binding: FragmentSettingBinding? = null
@@ -26,7 +25,6 @@ class SettingFragment : Fragment() {
 
     private val args: SettingFragmentArgs by navArgs()
 
-    // Khởi tạo binding cho layout setting
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -34,15 +32,15 @@ class SettingFragment : Fragment() {
         return b.root
     }
 
-    // Tải thông tin người dùng và thiết lập hành động cho các nút
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val db = AppDatabase.getInstance(requireContext())
         val userDao = db.userDao()
 
+        // Lấy user theo userId (suspend) rồi đổ UI
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val u = userDao.getById(args.userId)
+            val u = userDao.getById(args.userId)   // ⬅ đổi từ getByIdOnce() -> getById()
             withContext(Dispatchers.Main) {
                 if (u == null) {
                     b.tvName.text = "Unknown User"
@@ -57,45 +55,45 @@ class SettingFragment : Fragment() {
                     "male" -> b.imgAvatar.setImageResource(R.drawable.avatar_male)
                     "female" -> b.imgAvatar.setImageResource(R.drawable.avatar_female)
                     else -> {
+                        // Nếu có chuỗi URL/URI hợp lệ -> parse, còn lại dùng logo
                         u.avatarUrl
                             ?.takeIf { it.isNotBlank() }
                             ?.let { safe ->
                                 try {
-                                    val uri = Uri.parse(safe)
+                                    val uri = Uri.parse(safe)  // safe là String, không null
                                     b.imgAvatar.setImageURI(uri)
                                 } catch (_: Exception) {
                                     b.imgAvatar.setImageResource(R.drawable.ic_logo)
                                 }
-                            } ?: b.imgAvatar.setImageResource(R.drawable.ic_logo)
+                            } ?: run {
+                            b.imgAvatar.setImageResource(R.drawable.ic_logo)
+                        }
                     }
                 }
             }
         }
 
+        // Back
         b.btnBack.setOnClickListener { findNavController().navigateUp() }
 
-        val isDarkMode = ThemePreferences.isDarkMode(requireContext())
-        b.switchMode.isChecked = isDarkMode
-        updateModeLabel(isDarkMode)
-
-        b.switchMode.setOnCheckedChangeListener { _, checked ->
-            ThemePreferences.updateDarkMode(requireContext(), checked)
-            updateModeLabel(checked)
-        }
-
+        // Logout -> Onboard (đã có action trong nav_graph)
         b.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
+                // xóa cờ is_logged_in trong DB
                 withContext(Dispatchers.IO) {
                     AppDatabase.getInstance(requireContext()).userDao().clearLoggedIn()
                 }
 
+                // reset biến toàn cục
                 AppGlobals.isLoggedIn = false
                 AppGlobals.currentUserId = null
 
+                // điều hướng và dọn stack
                 findNavController().navigate(
                     R.id.onboardFragment,
                     null,
                     androidx.navigation.navOptions {
+                        // pop sạch về Splash để không quay lại Home/Setting được nữa
                         popUpTo(R.id.plashOnboardFragment) { inclusive = true }
                     }
                 )
@@ -103,14 +101,8 @@ class SettingFragment : Fragment() {
         }
     }
 
-    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun updateModeLabel(isDark: Boolean) {
-        val labelRes = if (isDark) R.string.dark_mode_label else R.string.light_mode_label
-        b.tvModeLabel.text = getString(labelRes)
     }
 }

@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Calendar
 
-// Fragment tạo công việc mới với form nhập ngày và giờ
 class AddFragment : Fragment() {
 
     private var _binding: FragmentAddBinding? = null
@@ -33,7 +32,6 @@ class AddFragment : Fragment() {
     private val dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
 
-    // Khởi tạo binding cho layout thêm công việc
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,18 +41,18 @@ class AddFragment : Fragment() {
         return binding.root
     }
 
-    // Gắn sự kiện cho form sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // mở picker đúng theo XML
         binding.edtDate.setOnClickListener { showDatePicker() }
         binding.edtStartTime.setOnClickListener { showTimePicker(isStart = true) }
         binding.edtEndTime.setOnClickListener { showTimePicker(isStart = false) }
 
+        // lưu
         binding.btnAddTask.setOnClickListener { addTask() }
     }
 
-    // Thu thập dữ liệu, kiểm tra hợp lệ và lưu công việc mới
     private fun addTask() {
         val title = binding.edtTitle.text?.toString()?.trim().orEmpty()
         val detail = binding.edtDetail.text?.toString()?.trim().orEmpty()
@@ -62,11 +60,13 @@ class AddFragment : Fragment() {
         val start = binding.edtStartTime.text?.toString()?.trim().orEmpty()
         val end = binding.edtEndTime.text?.toString()?.trim().orEmpty()
 
+        // xoá lỗi cũ
         binding.edtTitle.error = null
         binding.edtDate.error = null
         binding.edtStartTime.error = null
         binding.edtEndTime.error = null
 
+        // --- validate tối thiểu theo đúng form ---
         var ok = true
 
         if (title.isEmpty()) {
@@ -86,6 +86,7 @@ class AddFragment : Fragment() {
             null
         }
 
+        // nếu có nhập giờ thì yêu cầu đủ cả 2 và start <= end
         val hasStart = start.isNotEmpty()
         val hasEnd = end.isNotEmpty()
         var startObj: LocalTime? = null
@@ -109,7 +110,7 @@ class AddFragment : Fragment() {
         }
 
         if (!ok) return
-        if (dateObj == null) return
+        // -----------------------------------------
 
         viewLifecycleOwner.lifecycleScope.launch {
             val db = AppDatabase.getInstance(requireContext().applicationContext)
@@ -125,7 +126,7 @@ class AddFragment : Fragment() {
                 id = 0L,
                 userId = currentUser.id,
                 title = title,
-                description = detail,
+                description = detail,   // khớp entity: dùng 'description'
                 isCompleted = false,
                 taskDate = date,
                 startTime = start,
@@ -142,7 +143,6 @@ class AddFragment : Fragment() {
         }
     }
 
-    // Hiển thị DatePicker và gán kết quả vào trường ngày
     private fun showDatePicker() {
         val c = Calendar.getInstance()
         DatePickerDialog(
@@ -154,7 +154,6 @@ class AddFragment : Fragment() {
         ).show()
     }
 
-    // Hiển thị TimePicker cho giờ bắt đầu hoặc kết thúc
     private fun showTimePicker(isStart: Boolean) {
         val c = Calendar.getInstance()
         TimePickerDialog(
@@ -169,7 +168,6 @@ class AddFragment : Fragment() {
         ).show()
     }
 
-    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

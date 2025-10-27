@@ -2,42 +2,33 @@ package com.example.appmanagement.data.entity
 
 import androidx.room.*
 
-// Room entity storing a user's profile and authentication information
 @Entity(
     tableName = "users",
-    indices = [Index(value = ["email"], unique = true)]
+    indices = [Index(value = ["email"], unique = true)] // ép email không trùng
 )
 data class User(
 
-    // Khóa chính tự tăng
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0L,
+    val id: Long = 0L,                // khóa chính tự tăng
 
-    // Tên hiển thị của người dùng
     @ColumnInfo(name = "name")
-    val name: String,
+    val name: String,                 // tên hiển thị
 
-    // Email duy nhất dùng để đăng nhập
     @ColumnInfo(name = "email")
-    val email: String,
+    val email: String,                // email đăng nhập (duy nhất)
 
-    // Mật khẩu dạng băm sử dụng BCrypt
     @ColumnInfo(name = "password_hash")
-    val passwordHash: String,
+    val passwordHash: String,         // mật khẩu đã băm (BCrypt hash)
 
-    // Ngày sinh có thể bỏ trống
     @ColumnInfo(name = "birth_date")
-    val birthDate: String?,
+    val birthDate: String?,           // ngày sinh, có thể bỏ trống
 
-    // Đường dẫn hoặc URL ảnh đại diện
     @ColumnInfo(name = "avatar_url")
-    val avatarUrl: String?,
+    val avatarUrl: String?,           // đường dẫn hoặc URL ảnh đại diện (nullable)
 
-    // Thời điểm tạo tài khoản
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis(), // thời điểm tạo tài khoản
 
-    // Trạng thái đăng nhập hiện tại
     @ColumnInfo(name = "is_logged_in")
-    val isLoggedIn: Boolean = false
+    val isLoggedIn: Boolean = false   // trạng thái đăng nhập
 )

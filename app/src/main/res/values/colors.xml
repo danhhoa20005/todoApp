@@ -1,58 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Core palette -->
-    <color name="color_primary">#3D7BFF</color>
-    <color name="color_on_primary">#FFFFFF</color>
-    <color name="color_secondary">#9B6BFF</color>
-    <color name="color_on_secondary">#FFFFFF</color>
-    <color name="color_background">#F4F6FB</color>
-    <color name="color_on_background">#0F172A</color>
-    <color name="color_surface">#FFFFFF</color>
-    <color name="color_on_surface">#141820</color>
-    <color name="color_surface_variant">#E2E8F5</color>
-    <color name="color_on_surface_variant">#4B5565</color>
-    <color name="color_outline">#C6CEE3</color>
-    <color name="color_inverse_on_surface">#181A20</color>
 
-    <!-- Legacy aliases (kept for existing layouts) -->
+    <!-- Cơ bản -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <color name="bg_dark">@color/color_background</color>
-    <color name="card_dark">@color/color_surface</color>
-    <color name="text_white">@color/color_on_surface</color>
-    <color name="text_gray">@color/color_on_surface_variant</color>
-    <color name="text_highlight">#FFD700</color>
 
-    <!-- Navigation / tab colors -->
-    <color name="tab_inactive">@color/color_on_surface_variant</color>
-    <color name="tab_active">@color/color_primary</color>
-    <color name="tab_blue">@color/color_primary</color>
-    <color name="nav_active">@color/color_primary</color>
-    <color name="nav_inactive">@color/color_on_surface_variant</color>
+    <!-- Nền ứng dụng -->
+    <color name="bg_dark">#181A20</color>      <!-- Background 01 -->
+    <color name="card_dark">#1F222A</color>    <!-- Background 02 / Surface -->
 
-    <!-- Accent palette -->
-    <color name="primary">@color/color_primary</color>
-    <color name="secondary">@color/color_secondary</color>
+    <!-- Text -->
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#B0B3B8</color>
+    <color name="text_highlight">#FFD700</color> <!-- số/nhấn -->
+
+    <!-- Tab / Điều hướng -->
+    <color name="tab_inactive">#808080</color>
+    <color name="tab_active">#FFFFFF</color>
+    <color name="tab_blue">#3D7BFF</color>      <!-- PRIMARY từ palette -->
+
+    <!-- Primary / Secondary (theo “Main Colors”) -->
+    <color name="primary">#3D7BFF</color>       <!-- xanh dương chính -->
+    <color name="secondary">#9B6BFF</color>     <!-- tím secondary -->
+
+    <!-- Progress / Accent gradient (tím -> xanh dương) -->
     <color name="gradient_start">#6B88FF</color>
     <color name="gradient_end">#9B6BFF</color>
-    <color name="fab_blue">@color/color_primary</color>
+
+    <!-- Nút + / FAB: xanh dương cùng tông primary -->
+    <color name="fab_blue">#3D7BFF</color>
+
+    <!-- Accent bổ trợ -->
     <color name="purple_200">#9B6BFF</color>
     <color name="purple_500">#5A3EA6</color>
     <color name="purple_700">#37215E</color>
-    <color name="teal_200">#5EEAD4</color>
+    <color name="teal_200">#5EEAD4</color>      <!-- mint dịu (Colorful) -->
     <color name="teal_700">#1B5E5A</color>
 
-    <!-- Content helpers -->
-    <color name="text_primary">@color/color_on_surface</color>
-    <color name="text_secondary">@color/color_on_surface_variant</color>
-    <color name="text_hint">#7D869A</color>
-    <color name="icon_primary">@color/color_on_surface</color>
-    <color name="icon_secondary">@color/color_on_surface_variant</color>
-    <color name="switch_thumb">@color/color_on_primary</color>
-    <color name="switch_track">#BFD1FF</color>
+    <!-- Trạng thái / biểu đồ tuần -->
+    <color name="selected_color">#4B2F91</color>  <!-- nền khi chọn -->
+    <color name="done_color">#5A3EA6</color>      <!-- track/nền progress -->
+    <color name="weekly_bar">#5A3EA6</color>      <!-- cột thống kê tuần -->
 
-    <!-- Status / charts -->
-    <color name="selected_color">#4B2F91</color>
-    <color name="done_color">#5A3EA6</color>
-    <color name="weekly_bar">#5A3EA6</color>
+
+
+
+
+
 </resources>

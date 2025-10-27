@@ -20,7 +20,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// Danh sách công việc đã hoàn thành hỗ trợ kéo thả để sắp xếp lại
 class DoneFragment : Fragment() {
 
     private var _binding: FragmentDoneBinding? = null
@@ -32,7 +31,6 @@ class DoneFragment : Fragment() {
     private var isDragging = false
     private var originalAnimator: RecyclerView.ItemAnimator? = null
 
-    // Khởi tạo binding cho fragment
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,7 +39,6 @@ class DoneFragment : Fragment() {
         return binding.root
     }
 
-    // Thiết lập adapter, kéo thả và quan sát dữ liệu sau khi view được tạo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -63,6 +60,7 @@ class DoneFragment : Fragment() {
                 }
             },
             onCheckClick = { task ->
+                // Ở màn Done: nhấn ✅ để khôi phục về "chưa hoàn thành"
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                     taskRepo.toggle(task)
                 }
@@ -77,6 +75,7 @@ class DoneFragment : Fragment() {
             originalAnimator = itemAnimator
         }
 
+        // Kéo–thả sắp xếp trong danh sách đã hoàn thành
         val touchCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
         ) {
@@ -117,19 +116,19 @@ class DoneFragment : Fragment() {
         }
         ItemTouchHelper(touchCallback).attachToRecyclerView(binding.rvTasks)
 
+        // Chỉ observe các task đã hoàn thành (đã sort theo order_index ở DAO)
         viewLifecycleOwner.lifecycleScope.launch {
             val user = withContext(Dispatchers.IO) { accountRepo.getCurrentUser() }
             user?.let {
                 taskRepo.completed(it.id).observe(viewLifecycleOwner) { tasks ->
                     if (!isDragging) {
-                        taskAdapter.submitList(tasks)
+                        taskAdapter.submitList(tasks) // KHÔNG cập nhật khi đang kéo
                     }
                 }
             }
         }
     }
 
-    // Dọn binding khi view bị huỷ
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

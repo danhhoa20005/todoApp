@@ -10,10 +10,9 @@ import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import kotlin.math.max
 
-// Helpers for counting weekly tasks and rendering the summary chart
 object WeekChart {
 
-    // Count tasks scheduled for the current week from Monday to Sunday
+    /** Đếm task tuần hiện tại (T2..CN). */
     fun computeWeekCounts(all: List<Task>, today: LocalDate = LocalDate.now()): IntArray {
         val start = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val end = start.plusDays(6)
@@ -34,7 +33,9 @@ object WeekChart {
         return out
     }
 
-    // Render the weekly chart bars and labels with optional click handling
+    /**
+     * Vẽ cột (View): ẩn khi = 0, cao tỉ lệ. fullScaleCap mặc định = 30 task.
+     */
     fun render(
         rowBars: View,
         bars: List<View>,
@@ -53,7 +54,7 @@ object WeekChart {
 
             val dynamicMax = counts.maxOrNull() ?: 0
             val scaleMax = when {
-                fullScaleCap != null -> max(1, fullScaleCap)
+                fullScaleCap != null -> max(1, fullScaleCap) // 30 = full cột
                 dynamicMax == 0      -> 1
                 else                 -> dynamicMax
             }
@@ -75,7 +76,6 @@ object WeekChart {
         }
     }
 
-    // Animate view height changes smoothly for the bar chart
     private fun animateHeight(v: View, target: Int) {
         val start = v.height
         if (start == target) return
@@ -90,7 +90,6 @@ object WeekChart {
         }
     }
 
-    // Convert dp values to pixels based on the anchor view density
     private fun dp(anchor: View, value: Int): Int =
         (value * anchor.resources.displayMetrics.density).toInt()
 }
