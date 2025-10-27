@@ -25,7 +25,7 @@
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#181A20"
+        android:background="@color/bg_dark"
         app:menu="@menu/menu_bottom"
         app:labelVisibilityMode="unlabeled"
         app:itemIconSize="28dp"

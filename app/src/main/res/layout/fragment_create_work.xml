@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#11131A">
+    android:background="@color/color_background">
 
     <!-- Header -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,6 +21,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@android:color/transparent"
+            android:tint="@color/icon_primary"
             android:src="@drawable/ic_back"
             android:contentDescription="Back"
             app:layout_constraintStart_toStartOf="parent"
@@ -33,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="New Profile"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toEndOf="@id/btnBack1"
@@ -66,7 +67,7 @@
             android:focusable="true"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
             app:strokeWidth="2dp"
-            app:strokeColor="#FFFFFF"
+            app:strokeColor="@color/text_primary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -78,7 +79,7 @@
             android:layout_marginTop="12dp"
             android:gravity="center"
             android:text="YOUR PROFILE"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/text_primary"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/imgAvatar"
@@ -92,7 +93,7 @@
             android:layout_marginTop="4dp"
             android:gravity="center"
             android:text="Tap to choose image"
-            android:textColor="#7F8A9E"
+            android:textColor="@color/text_secondary"
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@id/tvDisplayName"
             app:layout_constraintStart_toStartOf="parent"
@@ -106,7 +107,7 @@
             android:layout_marginTop="24dp"
             android:text="USERNAME"
             android:textAllCaps="true"
-            android:textColor="#6C7688"
+            android:textColor="@color/text_secondary"
             android:textSize="10sp"
             app:layout_constraintTop_toBottomOf="@id/tvAvatarHint"
             app:layout_constraintStart_toStartOf="parent"/>
@@ -117,8 +118,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:boxBackgroundColor="#0F1218"
-            app:boxStrokeColor="#2A3140"
+            app:boxBackgroundColor="@color/color_surface"
+            app:boxStrokeColor="@color/color_outline"
             app:hintEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/tvUsernameLabel"
             app:layout_constraintStart_toStartOf="parent"
@@ -129,8 +130,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="your name"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#61708B"/>
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Date of birth -->
@@ -141,7 +142,7 @@
             android:layout_marginTop="20dp"
             android:text="DATE OF BIRTH"
             android:textAllCaps="true"
-            android:textColor="#6C7688"
+            android:textColor="@color/text_secondary"
             android:textSize="10sp"
             app:layout_constraintTop_toBottomOf="@id/tilUsername"
             app:layout_constraintStart_toStartOf="parent"/>
@@ -152,8 +153,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:boxBackgroundColor="#0F1218"
-            app:boxStrokeColor="#2A3140"
+            app:boxBackgroundColor="@color/color_surface"
+            app:boxStrokeColor="@color/color_outline"
             app:endIconMode="none"
             app:hintEnabled="false"
             app:layout_constraintTop_toBottomOf="@id/tvDobLabel"
@@ -167,8 +168,8 @@
                 android:hint="02/05/2005"
                 android:focusable="false"
                 android:inputType="none"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#61708B"/>
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Next button -->
@@ -178,7 +179,7 @@
             android:layout_height="wrap_content"
             android:text="Next"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:background="@drawable/bg_button_social"
             app:layout_constraintBottom_toBottomOf="parent"

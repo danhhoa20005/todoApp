@@ -6,6 +6,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="today_completed_sub">%1$d/%2$d đã hoàn thành</string>
     <string name="percent_format">%.2f%%</string>
+    <string name="dark_mode_label">Chế độ tối</string>
+    <string name="light_mode_label">Chế độ sáng</string>
 
 
 

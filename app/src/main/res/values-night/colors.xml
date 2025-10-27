@@ -5,14 +5,14 @@
     <color name="color_on_primary">#FFFFFF</color>
     <color name="color_secondary">#9B6BFF</color>
     <color name="color_on_secondary">#FFFFFF</color>
-    <color name="color_background">#F4F6FB</color>
-    <color name="color_on_background">#0F172A</color>
-    <color name="color_surface">#FFFFFF</color>
-    <color name="color_on_surface">#141820</color>
-    <color name="color_surface_variant">#E2E8F5</color>
-    <color name="color_on_surface_variant">#4B5565</color>
-    <color name="color_outline">#C6CEE3</color>
-    <color name="color_inverse_on_surface">#181A20</color>
+    <color name="color_background">#181A20</color>
+    <color name="color_on_background">#FFFFFF</color>
+    <color name="color_surface">#1F222A</color>
+    <color name="color_on_surface">#FFFFFF</color>
+    <color name="color_surface_variant">#2B2F38</color>
+    <color name="color_on_surface_variant">#B0B3B8</color>
+    <color name="color_outline">#40FFFFFF</color>
+    <color name="color_inverse_on_surface">#F4F6FB</color>
 
     <!-- Legacy aliases (kept for existing layouts) -->
     <color name="black">#000000</color>
@@ -45,11 +45,11 @@
     <!-- Content helpers -->
     <color name="text_primary">@color/color_on_surface</color>
     <color name="text_secondary">@color/color_on_surface_variant</color>
-    <color name="text_hint">#7D869A</color>
+    <color name="text_hint">#80FFFFFF</color>
     <color name="icon_primary">@color/color_on_surface</color>
     <color name="icon_secondary">@color/color_on_surface_variant</color>
     <color name="switch_thumb">@color/color_on_primary</color>
-    <color name="switch_track">#BFD1FF</color>
+    <color name="switch_track">#37215E</color>
 
     <!-- Status / charts -->
     <color name="selected_color">#4B2F91</color>

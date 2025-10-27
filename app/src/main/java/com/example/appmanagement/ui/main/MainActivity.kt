@@ -10,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.databinding.ActivityMainBinding
+import com.example.appmanagement.util.ThemePreferences
 import com.google.android.material.navigation.NavigationBarView
 
 // Activity chính chứa NavHost và điều khiển BottomNavigation
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     // Thiết lập điều hướng và xử lý insets khi Activity khởi tạo
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemePreferences.applySavedTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 

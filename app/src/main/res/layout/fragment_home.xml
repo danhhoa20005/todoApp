@@ -21,7 +21,7 @@
             android:layout_weight="1"
             android:alpha="0.85"
             android:text="Hello"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="32sp" />
 
         <ImageView
@@ -66,7 +66,7 @@
                 android:background="@null"
                 android:hint="Search tasks..."
                 android:textColorHint="@android:color/darker_gray"
-                android:textColor="@android:color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Today’s Tasks"
-                android:textColor="@android:color/white"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -104,7 +104,7 @@
                 android:layout_marginTop="6dp"
                 android:alpha="0.75"
                 android:text="3/5 is completed"
-                android:textColor="@android:color/white" />
+                android:textColor="@color/text_primary" />
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/progress"
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="68.99%"
-                android:textColor="@android:color/white"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -157,7 +157,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tasks in this week"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/text_primary"
                     android:alpha="0.9"
                     android:textSize="18sp"
                     android:layout_marginBottom="10dp" />
@@ -186,7 +186,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"
@@ -215,7 +215,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -243,7 +243,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -271,7 +271,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -299,7 +299,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -327,7 +327,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -355,7 +355,7 @@
                             android:layout_height="wrap_content"
                             android:text="0"
                             android:textSize="13sp"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/text_primary"
                             android:alpha="0.9"
                             android:layout_alignParentTop="true"
                             android:layout_centerHorizontal="true"/>
@@ -394,7 +394,7 @@
                     android:layout_height="wrap_content"
                     android:text="Tuần này chưa có công việc"
                     android:textSize="14sp"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/text_primary"
                     android:alpha="0.65"
                     android:gravity="center"
                     android:paddingTop="6dp"
@@ -429,7 +429,7 @@
                     android:layout_weight="1"
                     android:layout_marginStart="12dp"
                     android:text="Completed Tasks"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/text_primary"
                     android:textSize="16sp" />
 
                 <TextView
@@ -437,7 +437,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="8"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/text_primary"
                     android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
