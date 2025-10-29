@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import com.example.appmanagement.util.AppGlobals
+import com.example.appmanagement.util.ThemeManager
 
 import kotlinx.coroutines.launch
 
@@ -36,7 +37,8 @@ class SettingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val db = AppDatabase.getInstance(requireContext())
+        val context = requireContext()
+        val db = AppDatabase.getInstance(context)
         val userDao = db.userDao()
 
         // Lấy user theo userId (suspend) rồi đổ UI
@@ -77,6 +79,14 @@ class SettingFragment : Fragment() {
         // Back
         b.btnBack.setOnClickListener { findNavController().navigateUp() }
 
+        val isDarkMode = ThemeManager.isDarkMode(context)
+        updateModeLabel(isDarkMode)
+        b.switchMode.isChecked = isDarkMode
+        b.switchMode.setOnCheckedChangeListener { _, checked ->
+            ThemeManager.setDarkMode(context, checked)
+            updateModeLabel(checked)
+        }
+
         // Logout -> Onboard (đã có action trong nav_graph)
         b.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -105,5 +115,10 @@ class SettingFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun updateModeLabel(isDark: Boolean) {
+        val labelRes = if (isDark) R.string.setting_dark_mode else R.string.setting_light_mode
+        b.tvModeLabel.setText(labelRes)
     }
 }

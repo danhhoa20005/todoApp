@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- // Bảng màu sử dụng xuyên suốt giao diện ứng dụng -->
+<!-- Light theme palette introduces a contrasting look while sharing names with the dark colors. -->
 <resources>
-
-    <!-- Cơ bản -->
+    <!-- Base -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
-    <!-- Nền ứng dụng -->
-    <color name="bg_dark">#181A20</color>      <!-- Background 01 -->
-    <color name="card_dark">#1F222A</color>    <!-- Background 02 / Surface -->
+    <!-- App background -->
+    <color name="bg_dark">#F4F6FB</color>
+    <color name="card_dark">#FFFFFF</color>
 
     <!-- Text -->
-    <color name="text_white">#FFFFFF</color>
-    <color name="text_gray">#B0B3B8</color>
-    <color name="text_highlight">#FFD700</color> <!-- số/nhấn -->
+    <color name="text_white">#101828</color>
+    <color name="text_gray">#475467</color>
+    <color name="text_highlight">#2D6BFF</color>
+    <color name="text_muted">#667085</color>
+    <color name="text_hint">#98A2B3</color>
 
-    <!-- Tab / Điều hướng -->
-    <color name="tab_inactive">#808080</color>
-    <color name="tab_active">#FFFFFF</color>
-    <color name="tab_blue">#3D7BFF</color>      <!-- PRIMARY từ palette -->
+    <!-- Tabs / navigation -->
+    <color name="tab_inactive">#98A2B3</color>
+    <color name="tab_active">#1D2939</color>
+    <color name="tab_blue">#3D7BFF</color>
 
-    <!-- Primary / Secondary (theo “Main Colors”) -->
-    <color name="primary">#3D7BFF</color>       <!-- xanh dương chính -->
-    <color name="secondary">#9B6BFF</color>     <!-- tím secondary -->
+    <!-- Primary / Secondary -->
+    <color name="primary">#3D7BFF</color>
+    <color name="secondary">#9B6BFF</color>
 
-    <!-- Progress / Accent gradient (tím -> xanh dương) -->
+    <!-- Gradient accents -->
     <color name="gradient_start">#6B88FF</color>
     <color name="gradient_end">#9B6BFF</color>
 
-    <!-- Nút + / FAB: xanh dương cùng tông primary -->
+    <!-- FAB -->
     <color name="fab_blue">#3D7BFF</color>
 
-    <!-- Accent bổ trợ -->
+    <!-- Accent -->
     <color name="purple_200">#9B6BFF</color>
     <color name="purple_500">#5A3EA6</color>
     <color name="purple_700">#37215E</color>
-    <color name="teal_200">#5EEAD4</color>      <!-- mint dịu (Colorful) -->
+    <color name="teal_200">#5EEAD4</color>
     <color name="teal_700">#1B5E5A</color>
 
-    <!-- Trạng thái / biểu đồ tuần -->
-    <color name="selected_color">#4B2F91</color>  <!-- nền khi chọn -->
-    <color name="done_color">#5A3EA6</color>      <!-- track/nền progress -->
-    <color name="weekly_bar">#5A3EA6</color>      <!-- cột thống kê tuần -->
+    <color name="input_stroke">#D0D5DD</color>
 
+    <!-- States / charts -->
+    <color name="selected_color">#E3E6FF</color>
+    <color name="done_color">#3D7BFF</color>
+    <color name="weekly_bar">#3D7BFF</color>
 
+    <!-- Switch -->
+    <color name="switch_thumb">#FFFFFF</color>
+    <color name="switch_track">#A0B4FF</color>
 
-
-
-
+    <!-- Ripple / overlays -->
+    <color name="ripple_neutral">#1A101828</color>
 </resources>
