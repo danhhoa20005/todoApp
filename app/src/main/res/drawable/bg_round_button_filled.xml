@@ -1,5 +1,6 @@
-<!-- // Hình nền nút bo tròn nền đặc -->
 <?xml version="1.0" encoding="utf-8"?>
+<!-- // Hình nền nút bo tròn nền đặc -->
+
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
     <solid android:color="@color/card_dark"/>   <!-- tím: dùng bảng màu mới -->
     <size android:width="72dp" android:height="72dp"/>

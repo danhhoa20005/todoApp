@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- // Layout item cho từng công việc trong danh sách với thông tin thời gian và nút thao tác -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_marginBottom="12dp"
-    android:paddingHorizontal="4dp">
+    android:paddingHorizontal="4dp"
+    android:background="@android:color/transparent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:textColor="@color/text_white"
             android:textSize="10sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvCreatedDate"
@@ -32,19 +32,19 @@
             android:textColor="@color/text_white"
             android:textSize="10sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Thẻ task có ripple -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardTask"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="false"
+        app:cardPreventCornerOverlap="true"
         app:cardBackgroundColor="@color/card_dark"
         app:strokeWidth="0dp"
-
         android:clickable="true"
         android:focusable="true"
         app:rippleColor="?attr/colorControlHighlight">
@@ -66,7 +66,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/btnEdit"
-                app:layout_constraintBottom_toTopOf="@id/tvDetail"/>
+                app:layout_constraintBottom_toTopOf="@id/tvDetail" />
 
             <TextView
                 android:id="@+id/tvDetail"
@@ -80,7 +80,7 @@
                 app:layout_constraintTop_toBottomOf="@id/tvTitle"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btnEdit"/>
+                app:layout_constraintEnd_toStartOf="@id/btnEdit" />
 
             <ImageButton
                 android:id="@+id/btnEdit"
@@ -92,7 +92,7 @@
                 android:contentDescription="Sửa"
                 app:layout_constraintEnd_toStartOf="@id/btnDelete"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnDelete"
@@ -105,7 +105,7 @@
                 android:contentDescription="Xóa"
                 app:layout_constraintEnd_toStartOf="@id/btnCheck"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnCheck"
@@ -118,7 +118,7 @@
                 android:contentDescription="Hoàn thành"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintBottom_toBottomOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 

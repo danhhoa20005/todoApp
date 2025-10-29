@@ -41,4 +41,9 @@
     <color name="switch_track">#54468F</color>
 
     <color name="ripple_neutral">#1FFFFFFF</color>
+
+    <color name="lapTextPrimary">#FFFFFFFF</color>
+    <color name="lapTextSecondary">#CCFFFFFF</color>
+    <color name="lapDivider">#22FFFFFF</color>
+
 </resources>

@@ -1,7 +1,5 @@
-// Fragment ClockFragment triển khai đồng hồ bấm giờ với chức năng lưu mốc và khôi phục trạng thái
 package com.example.appmanagement.ui.menu
 
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,9 +7,9 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.appmanagement.R
 import com.example.appmanagement.databinding.FragmentClockBinding
 import kotlin.math.floor
 
@@ -20,21 +18,24 @@ class ClockFragment : Fragment() {
     private var _binding: FragmentClockBinding? = null
     private val binding get() = _binding!!
 
+    // stopwatch state
     private var isRunning = false
-    private var startTimeUptime = 0L
-    private var elapsedBeforePause = 0L
-    private var lapCount = 0
+    private var startTimeUptime = 0L            // uptime lúc bấm "Play" gần nhất
+    private var elapsedBeforePause = 0L         // tổng ms đã chạy trước lần Play hiện tại
+    private var lapCount = 0                    // số mốc đã lưu
 
+    // handler để update UI ~60fps
     private val uiHandler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
             updateElapsedTimeText()
-            uiHandler.postDelayed(this, 16L)
+            uiHandler.postDelayed(this, 16L) // ~60fps
         }
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentClockBinding.inflate(inflater, container, false)
@@ -44,22 +45,34 @@ class ClockFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Khôi phục trạng thái sau rotate
         if (savedInstanceState != null) {
-            isRunning = savedInstanceState.getBoolean("isRunning", false)
-            startTimeUptime = savedInstanceState.getLong("startTimeUptime", 0L)
-            elapsedBeforePause = savedInstanceState.getLong("elapsedBeforePause", 0L)
-            lapCount = savedInstanceState.getInt("lapCount", 0)
+            isRunning = savedInstanceState.getBoolean(KEY_IS_RUNNING, false)
+            startTimeUptime = savedInstanceState.getLong(KEY_START_TIME, 0L)
+            elapsedBeforePause = savedInstanceState.getLong(KEY_ELAPSED_BEFORE_PAUSE, 0L)
+            lapCount = savedInstanceState.getInt(KEY_LAP_COUNT, 0)
         }
 
+        // Nút play/pause
         binding.toggleButton.setOnClickListener {
-            if (isRunning) pauseTimer() else startTimer()
+            if (isRunning) {
+                pauseTimer()
+            } else {
+                startTimer()
+            }
         }
 
-        binding.resetButton.setOnClickListener { resetTimer() }
+        // Nút reset
+        binding.resetButton.setOnClickListener {
+            resetTimer()
+        }
 
+        // Đồng bộ UI ban đầu
         updateElapsedTimeText()
         syncToggleButton()
     }
+
+    // region Stopwatch core
 
     private fun startTimer() {
         if (isRunning) return
@@ -72,15 +85,19 @@ class ClockFragment : Fragment() {
     private fun pauseTimer() {
         if (!isRunning) return
         isRunning = false
-        elapsedBeforePause += SystemClock.uptimeMillis() - startTimeUptime
+
+        // Gom thời gian vừa chạy vào tổng
+        elapsedBeforePause += (SystemClock.uptimeMillis() - startTimeUptime)
+
+        // Ngưng update UI
         uiHandler.removeCallbacks(updateRunnable)
         syncToggleButton()
 
-        // Lưu mốc thời gian
-        val lapText = binding.elapsedTimeText.text?.toString().orEmpty()
-        if (lapText.isNotBlank()) {
+        // Lưu mốc (lap)
+        val snapshot = binding.elapsedTimeText.text?.toString().orEmpty()
+        if (snapshot.isNotBlank()) {
             lapCount += 1
-            addLapRow(lapCount, lapText)
+            addLapRow(lapCount, snapshot)
         }
     }
 
@@ -89,25 +106,35 @@ class ClockFragment : Fragment() {
         startTimeUptime = 0L
         elapsedBeforePause = 0L
         lapCount = 0
+
         uiHandler.removeCallbacks(updateRunnable)
+
         updateElapsedTimeText()
         syncToggleButton()
+
+        // Xoá toàn bộ lap
         binding.lapsContainer?.removeAllViews()
     }
 
     private fun updateElapsedTimeText() {
-        val elapsed = if (isRunning) {
+        // Thời gian đã trôi qua = tổng cũ + (now - start) nếu đang chạy
+        val elapsedNow = if (isRunning) {
             elapsedBeforePause + (SystemClock.uptimeMillis() - startTimeUptime)
         } else {
             elapsedBeforePause
         }
 
-        val totalSeconds = floor(elapsed / 1000.0).toLong()
+        val totalSeconds = floor(elapsedNow / 1000.0).toLong()
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
-        val centiseconds = (elapsed % 1000) / 10
+        val centiseconds = (elapsedNow % 1000) / 10 // phần trăm giây (00-99)
 
-        binding.elapsedTimeText.text = String.format("%02d:%02d.%02d", minutes, seconds, centiseconds)
+        binding.elapsedTimeText.text = String.format(
+            "%02d:%02d.%02d",
+            minutes,
+            seconds,
+            centiseconds
+        )
     }
 
     private fun syncToggleButton() {
@@ -120,68 +147,64 @@ class ClockFragment : Fragment() {
         }
     }
 
-    /** Thêm 1 dòng mốc thời gian chuyên nghiệp: Time 01 | 00:30.24 */
+    // endregion
+
+    // region Lap list
+
+    /**
+     * Thêm 1 dòng mốc thời gian kiểu:
+     * Time 01        00:30.24
+     * -----------
+     *
+     * Giờ ta inflate từ XML (item_lap_row.xml) để:
+     * - tự dùng @color/... => dark/light ok
+     * - dễ chỉnh style
+     */
     private fun addLapRow(index: Int, timeText: String) {
-        val ctx = context ?: return
         val container = binding.lapsContainer ?: return
+        val inflater = LayoutInflater.from(requireContext())
 
-        val row = LinearLayout(ctx).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(dp(12), dp(10), dp(12), dp(10))
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
+        // inflate layout 1 lap
+        val rowView = inflater.inflate(R.layout.item_lap_row, container, false)
+
+        val tvLapLabel = rowView.findViewById<TextView>(R.id.tvLapLabel)
+        val tvLapValue = rowView.findViewById<TextView>(R.id.tvLapValue)
+
+        tvLapLabel.text = String.format("Time %02d", index)
+        tvLapValue.text = timeText
+
+        container.addView(rowView)
+
+        // Giới hạn số dòng nếu bạn muốn tránh vô hạn (ví dụ giữ tối đa 30 mốc)
+        val maxChildren = 30
+        if (container.childCount > maxChildren) {
+            container.removeViewAt(0)
         }
-
-        val left = TextView(ctx).apply {
-            text = String.format("Time %02d", index)
-            setTextColor(Color.parseColor("#CCFFFFFF"))
-            textSize = 14f
-        }
-
-        val right = TextView(ctx).apply {
-            text = timeText
-            setTextColor(Color.WHITE)
-            textSize = 18f
-            setTypeface(typeface, android.graphics.Typeface.BOLD)
-        }
-
-        val leftParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        row.addView(left, leftParams)
-        row.addView(right)
-
-        // Divider mảnh
-        val divider = View(ctx).apply {
-            setBackgroundColor(Color.parseColor("#22FFFFFF"))
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(1)
-            )
-        }
-
-        container.addView(row, 0)
-        container.addView(divider, 1)
-
-        if (container.childCount > 60) container.removeViews(container.childCount - 2, 2)
     }
 
-    private fun dp(v: Int): Int =
-        (v * resources.displayMetrics.density).toInt()
+    // endregion
+
+    // region Lifecycle & state keep
 
     override fun onPause() {
         super.onPause()
+        // luôn bỏ callback khi fragment background để tránh leak handler
         uiHandler.removeCallbacks(updateRunnable)
+
+        // Nếu đang chạy, chốt thời gian vào elapsedBeforePause
         if (isRunning) {
-            elapsedBeforePause += SystemClock.uptimeMillis() - startTimeUptime
+            elapsedBeforePause += (SystemClock.uptimeMillis() - startTimeUptime)
         }
     }
 
     override fun onResume() {
         super.onResume()
+        // Khi quay lại: nếu đang chạy thì thiết lập lại startTimeUptime và resume tick
         if (isRunning) {
             startTimeUptime = SystemClock.uptimeMillis()
             uiHandler.post(updateRunnable)
         } else {
+            // Nếu không chạy thì chỉ cần đồng bộ text
             updateElapsedTimeText()
         }
         syncToggleButton()
@@ -189,15 +212,25 @@ class ClockFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean("isRunning", isRunning)
-        outState.putLong("startTimeUptime", startTimeUptime)
-        outState.putLong("elapsedBeforePause", elapsedBeforePause)
-        outState.putInt("lapCount", lapCount)
+        outState.putBoolean(KEY_IS_RUNNING, isRunning)
+        outState.putLong(KEY_START_TIME, startTimeUptime)
+        outState.putLong(KEY_ELAPSED_BEFORE_PAUSE, elapsedBeforePause)
+        outState.putInt(KEY_LAP_COUNT, lapCount)
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         uiHandler.removeCallbacks(updateRunnable)
         _binding = null
+    }
+
+    // endregion
+
+    companion object {
+        private const val KEY_IS_RUNNING = "isRunning"
+        private const val KEY_START_TIME = "startTimeUptime"
+        private const val KEY_ELAPSED_BEFORE_PAUSE = "elapsedBeforePause"
+        private const val KEY_LAP_COUNT = "lapCount"
     }
 }

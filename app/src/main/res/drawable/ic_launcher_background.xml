@@ -1,5 +1,6 @@
-<!-- // Nền lưới chuẩn cho biểu tượng launcher -->
 <?xml version="1.0" encoding="utf-8"?>
+<!-- // Nền lưới chuẩn cho biểu tượng launcher -->
+
 <vector
     android:height="108dp"
     android:width="108dp"

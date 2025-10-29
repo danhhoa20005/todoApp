@@ -1,55 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Light theme palette introduces a contrasting look while sharing names with the dark colors. -->
+<!-- Light theme palette: contrasting with the dark theme, main color is purple -->
 <resources>
     <!-- Base -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
     <!-- App background -->
-    <color name="bg_dark">#F4F6FB</color>
-    <color name="card_dark">#FFFFFF</color>
+    <color name="bg_dark">#F5F3FF</color>           <!-- nền sáng tím nhạt -->
+    <color name="card_dark">#FFFFFF</color>         <!-- màu card nổi bật nhẹ hơn nền -->
 
     <!-- Text -->
-    <color name="text_white">#101828</color>
-    <color name="text_gray">#475467</color>
-    <color name="text_highlight">#2D6BFF</color>
-    <color name="text_muted">#667085</color>
-    <color name="text_hint">#98A2B3</color>
+    <color name="text_white">#1C1A29</color>        <!-- chữ chính (đậm) -->
+    <color name="text_gray">#475467</color>         <!-- chữ phụ -->
+    <color name="text_highlight">#7E57FF</color>    <!-- chữ nhấn tím sáng -->
+    <color name="text_muted">#667085</color>        <!-- chữ mờ -->
+    <color name="text_hint">#98A2B3</color>         <!-- gợi ý / placeholder -->
 
     <!-- Tabs / navigation -->
     <color name="tab_inactive">#98A2B3</color>
-    <color name="tab_active">#1D2939</color>
-    <color name="tab_blue">#3D7BFF</color>
+    <color name="tab_active">#4B2F91</color>
+    <color name="tab_blue">#7E57FF</color>
 
     <!-- Primary / Secondary -->
-    <color name="primary">#3D7BFF</color>
-    <color name="secondary">#9B6BFF</color>
+    <color name="primary">#7E57FF</color>           <!-- tím chủ đạo -->
+    <color name="secondary">#B388FF</color>         <!-- tím phụ -->
 
     <!-- Gradient accents -->
-    <color name="gradient_start">#6B88FF</color>
-    <color name="gradient_end">#9B6BFF</color>
+    <color name="gradient_start">#B388FF</color>
+    <color name="gradient_end">#7E57FF</color>
 
     <!-- FAB -->
-    <color name="fab_blue">#3D7BFF</color>
+    <color name="fab_blue">#7E57FF</color>
 
     <!-- Accent -->
-    <color name="purple_200">#9B6BFF</color>
-    <color name="purple_500">#5A3EA6</color>
-    <color name="purple_700">#37215E</color>
+    <color name="purple_200">#B388FF</color>
+    <color name="purple_500">#7E57FF</color>
+    <color name="purple_700">#4B2F91</color>
     <color name="teal_200">#5EEAD4</color>
     <color name="teal_700">#1B5E5A</color>
 
+    <!-- Input / outlines -->
     <color name="input_stroke">#D0D5DD</color>
 
     <!-- States / charts -->
-    <color name="selected_color">#E3E6FF</color>
-    <color name="done_color">#3D7BFF</color>
-    <color name="weekly_bar">#3D7BFF</color>
+    <color name="selected_color">#EDE9FF</color>
+    <color name="done_color">#C6B8FF</color>
+    <color name="weekly_bar">#7E57FF</color>
 
     <!-- Switch -->
     <color name="switch_thumb">#FFFFFF</color>
-    <color name="switch_track">#A0B4FF</color>
+    <color name="switch_track">#C6B8FF</color>
 
     <!-- Ripple / overlays -->
-    <color name="ripple_neutral">#1A101828</color>
+    <color name="ripple_neutral">#1A4B2F91</color>
+    <color name="lapTextPrimary">#FFFFFFFF</color>     <!-- trắng -->
+    <color name="lapTextSecondary">#CCFFFFFF</color>   <!-- trắng 80% -->
+    <color name="lapDivider">#22FFFFFF</color>         <!-- line trắng trong suốt -->
+
 </resources>

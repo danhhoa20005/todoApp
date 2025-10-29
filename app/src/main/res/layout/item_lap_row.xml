@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/rowContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:id="@+id/tvLapLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Time 01"
+            android:textSize="14sp"
+            android:textColor="@color/lapTextSecondary"/>
+
+        <TextView
+            android:id="@+id/tvLapValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:30.24"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@color/lapTextPrimary"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lapDivider"/>
+</LinearLayout>
