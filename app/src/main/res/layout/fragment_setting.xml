@@ -39,7 +39,7 @@
         android:text="Blake Gordon"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_white"
         android:gravity="center"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:text="blake@email.com"
         android:textSize="12sp"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_gray"
         android:gravity="center"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
@@ -83,17 +83,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Chế độ tối"
-            android:textColor="@android:color/white"
+            android:text="@string/setting_dark_mode"
+            android:textColor="@color/text_white"
             android:textSize="16sp"/>
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switchMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:thumbTint="@color/white"
-            android:trackTint="@color/purple_700"/>
+            android:thumbTint="@color/switch_thumb"
+            android:trackTint="@color/switch_track"/>
     </LinearLayout>
 
     <!-- Đăng xuất -->
@@ -104,7 +103,7 @@
         android:text="Log out"
         android:textAllCaps="false"
         android:textSize="15sp"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_white"
         app:cornerRadius="26dp"
         android:background="@drawable/bg_button_social"
         android:layout_marginStart="24dp"

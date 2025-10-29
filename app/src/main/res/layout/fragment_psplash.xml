@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:letterSpacing="0.02"
                 android:text="TODO"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/text_white"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
                 android:text=" APP"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                android:textColor="#B69CFF" />
+                android:textColor="@color/secondary" />
 
         </LinearLayout>
 

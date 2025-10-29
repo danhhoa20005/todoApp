@@ -8,7 +8,7 @@
     <!-- Viền ngoài -->
     <stroke
         android:width="2dp"
-        android:color="#B0B3B8" /> <!-- tím trung tính -->
+        android:color="@color/text_gray" /> <!-- tím trung tính -->
 
     <!-- Màu nền trong -->
     <solid android:color="@color/done_color" /> <!-- tím than nhẹ -->
