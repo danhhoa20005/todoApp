@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.databinding.FragmentEditBinding
+import com.example.appmanagement.notifications.NotificationScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,6 +70,7 @@ class EditFragment : Fragment() {
             val start = binding.edtStartTime.text?.toString()?.trim().orEmpty()
             val end = binding.edtEndTime.text?.toString()?.trim().orEmpty()
             val completed = binding.switchCompleted.isChecked  // Lấy trạng thái hoàn thành từ switch
+            val appContext = requireContext().applicationContext
 
             if (title.isBlank()) {
                 binding.edtTitle.error = "Vui lòng nhập tiêu đề"
@@ -90,6 +92,15 @@ class EditFragment : Fragment() {
                     isCompleted = completed   // Lưu trạng thái hoàn thành khi cập nhật
                 )
                 taskDao.update(updated)
+                if (start.isNotBlank()) {
+                    NotificationScheduler.scheduleTaskReminder(
+                        context = appContext,
+                        taskId = updated.id,
+                        title = title,
+                        date = date,
+                        startTime = start
+                    )
+                }
                 withContext(Dispatchers.Main) { findNavController().navigateUp() }
             }
         }

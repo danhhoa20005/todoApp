@@ -16,6 +16,7 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.databinding.FragmentAddBinding
+import com.example.appmanagement.notifications.NotificationScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -136,6 +137,15 @@ class AddFragment : Fragment() {
 
             val insertedId = withContext(Dispatchers.IO) { db.taskDao().insert(task) }
             if (insertedId > 0) {
+                if (startObj != null && dateObj != null) {
+                    NotificationScheduler.scheduleTaskReminder(
+                        context = requireContext().applicationContext,
+                        taskId = insertedId,
+                        title = title,
+                        date = date,
+                        startTime = start
+                    )
+                }
                 Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
                 findNavController().navigate(R.id.action_addFragment_to_homeFragment)
             } else {
