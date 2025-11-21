@@ -1,5 +1,6 @@
 package com.example.appmanagement.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -9,29 +10,50 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.widget.RemoteViews
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import com.example.appmanagement.R
 import com.example.appmanagement.ui.main.MainActivity
 
-/**
- * BroadcastReceiver hiển thị thông báo khi đến giờ bắt đầu của 1 task.
- * Được kích hoạt bởi [NotificationScheduler].
- */
 class TaskReminderReceiver : BroadcastReceiver() {
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onReceive(context: Context, intent: Intent) {
         val taskId = intent.getLongExtra(EXTRA_TASK_ID, 0L)
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         val startTime = intent.getStringExtra(EXTRA_START_TIME).orEmpty()
 
+        if (taskId <= 0L) return
+
         createChannelIfNeeded(context)
 
-        val contentIntent = TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(Intent(context, MainActivity::class.java))
-            getPendingIntent(taskId.toInt(), PendingIntent.FLAG_IMMUTABLE)
+        // Bấm thông báo → mở MainActivity (HomeFragment là startDestination)
+        val clickIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+
+        val contentIntent = PendingIntent.getActivity(
+            context,
+            taskId.toInt(),
+            clickIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Layout custom: icon + title + content (notification_task_reminder.xml)
+        val customView = RemoteViews(context.packageName, R.layout.notification_task_reminder).apply {
+            setTextViewText(
+                R.id.txtTitle,
+                "${context.getString(R.string.notify_task_start_prefix)} $title"
+            )
+            setTextViewText(R.id.txtContent, startTime)
+            setImageViewResource(R.id.imgIcon, R.drawable.ic_clock)
+            // Nếu sau này bạn muốn, có thể set thêm tvTimeRange / tvCreatedDate ở đây
+        }
+
+        // Âm thanh hệ thống
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_clock)
@@ -40,7 +62,11 @@ class TaskReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setSound(soundUri)
             .setContentIntent(contentIntent)
+            .setCustomContentView(customView)
+            .setCustomBigContentView(customView)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .build()
 
         NotificationManagerCompat.from(context).notify(taskId.toInt(), notification)
@@ -54,7 +80,9 @@ class TaskReminderReceiver : BroadcastReceiver() {
         val existing = notificationManager.getNotificationChannel(CHANNEL_ID)
         if (existing != null) return
 
+        // Âm thanh hệ thống cho channel
         val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+
         val channel = NotificationChannel(
             CHANNEL_ID,
             context.getString(R.string.notify_task_channel_name),

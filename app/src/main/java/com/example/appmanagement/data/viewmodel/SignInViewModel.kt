@@ -7,7 +7,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.appmanagement.data.db.AppDatabase
+import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +28,7 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> get() = _registerResult
 
-    /** Login with email & password (repository verifies with BCrypt). */
+    // login – đăng nhập email + password local
     fun login(email: String, password: String) {
         val e = email.trim()
         val p = password.trim()
@@ -43,7 +45,7 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Register a new user (repository hashes password internally). */
+    // register – tạo tài khoản local mới
     fun register(name: String, email: String, password: String) {
         val n = name.trim()
         val e = email.trim()
@@ -60,7 +62,6 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
                     accountRepository.register(n, e, p)
                     "ok"
                 } catch (ise: IllegalStateException) {
-                    // From repository: "email_exists" or "invalid_input"
                     when (ise.message) {
                         "email_exists"  -> "email_exists"
                         "invalid_input" -> "invalid"
@@ -71,6 +72,29 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
                 }
             }
             _registerResult.value = result
+        }
+    }
+
+    // loginWithGoogleUser – nhận FirebaseUser – gọi repo.loginWithGoogleAccount – trả User về callback
+    fun loginWithGoogleUser(
+        firebaseUser: FirebaseUser,
+        onSuccess: (User) -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val user = withContext(Dispatchers.IO) {
+                    accountRepository.loginWithGoogleAccount(
+                        uid = firebaseUser.uid,
+                        email = firebaseUser.email,
+                        name = firebaseUser.displayName,
+                        avatarUrl = firebaseUser.photoUrl?.toString()
+                    )
+                }
+                onSuccess(user)
+            } catch (e: Throwable) {
+                onError(e)
+            }
         }
     }
 }

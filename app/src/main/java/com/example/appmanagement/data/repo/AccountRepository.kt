@@ -1,20 +1,15 @@
-// Lớp AccountRepository làm trung gian giữa tầng dữ liệu và ViewModel cho các thao tác tài khoản người dùng
+// Quản lý tài khoản: đăng ký, đăng nhập, đăng xuất, cập nhật hồ sơ
 package com.example.appmanagement.data.repo
 
 import com.example.appmanagement.data.dao.UserDao
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.util.Security
 
-/**
- * Repository trung gian giữa ViewModel ↔ Room (UserDao)
- * Quản lý tài khoản: đăng ký, đăng nhập, đăng xuất, đổi mật khẩu, cập nhật hồ sơ.
- * Mật khẩu được lưu bằng BCrypt hash trong cột "password_hash".
- */
 class AccountRepository(
     private val userDao: UserDao
 ) {
 
-    /** Đăng ký user mới với mật khẩu được băm (hash) */
+    // register – tạo user mới – hash mật khẩu – set đăng nhập – lưu Room
     suspend fun register(
         name: String,
         email: String,
@@ -22,16 +17,12 @@ class AccountRepository(
         birthDate: String = "",
         avatarUrl: String? = null
     ): Long {
-        require(name.isNotBlank() && email.isNotBlank() && password.length >= 6) {
-            "invalid_input"
-        }
+        require(name.isNotBlank() && email.isNotBlank() && password.length >= 6)
 
-        // Nếu email đã tồn tại, báo lỗi
         if (userDao.existsEmail(email.trim())) {
             throw IllegalStateException("email_exists")
         }
 
-        // Băm mật khẩu bằng BCrypt
         val hashedPassword = Security.hashPassword(password.toCharArray())
 
         val newUser = User(
@@ -43,22 +34,19 @@ class AccountRepository(
             isLoggedIn = true
         )
 
-        // Clear user khác đang login, rồi insert user mới
         userDao.clearLoggedIn()
         return userDao.insert(newUser)
     }
 
-    /** Đăng nhập: trả về true nếu thành công */
+    // login – xác thực email + password – set đăng nhập – không liên quan Google
     suspend fun login(email: String, password: String): Boolean {
         val user = userDao.getByEmail(email.trim()) ?: return false
 
         val isVerified = when {
-            Security.looksHashed(user.passwordHash) -> {
-                // So sánh bằng BCrypt
+            Security.looksHashed(user.passwordHash) ->
                 Security.verifyPassword(password.toCharArray(), user.passwordHash)
-            }
+
             else -> {
-                // Nếu dữ liệu cũ còn plaintext, so sánh rồi tự động nâng cấp lên hash
                 val match = user.passwordHash == password
                 if (match) {
                     val newHash = Security.hashPassword(password.toCharArray())
@@ -76,30 +64,78 @@ class AccountRepository(
         return isVerified
     }
 
-    /** Đăng xuất: xóa trạng thái login */
+    // loginWithGoogleAccount – đăng nhập Google – match theo remoteId – tạo hoặc cập nhật user
+    suspend fun loginWithGoogleAccount(
+        uid: String,
+        email: String?,
+        name: String?,
+        avatarUrl: String?
+    ): User {
+        val safeEmail = (email ?: "$uid@firebase.local").trim()
+        val safeName = (name ?: safeEmail.substringBefore("@")).trim()
+
+        val existing = userDao.getByRemoteId(uid)
+
+        userDao.clearLoggedIn()
+
+        return if (existing != null) {
+            // user Google đã từng login -> cập nhật là đủ
+            val updated = existing.copy(
+                name = safeName,
+                email = safeEmail,
+                avatarUrl = avatarUrl,
+                isLoggedIn = true,
+                remoteId = uid,
+                updatedAt = System.currentTimeMillis()
+            )
+            userDao.update(updated)
+            updated
+
+        } else {
+            // lần đầu đăng nhập Google -> tạo user mới
+            val fakePassword = uid + "#google"
+            val hashedPassword = Security.hashPassword(fakePassword.toCharArray())
+
+            val newUser = User(
+                name = safeName,
+                email = safeEmail,
+                passwordHash = hashedPassword,
+                birthDate = null,
+                avatarUrl = avatarUrl,
+                isLoggedIn = true,
+                remoteId = uid,
+                updatedAt = System.currentTimeMillis()
+            )
+            val newId = userDao.insert(newUser)
+            newUser.copy(id = newId)
+        }
+    }
+
+    // logout – xóa trạng thái đăng nhập của toàn bộ user
     suspend fun logout() {
         userDao.clearLoggedIn()
     }
 
-    /** Lấy user hiện tại (đang login) */
+    // getCurrentUser – lấy user đang đăng nhập – phục vụ tự động login
     suspend fun getCurrentUser(): User? {
         return userDao.getLoggedInUser()
     }
 
-    /** Cập nhật hồ sơ (tên, ngày sinh, avatar) */
+    // updateProfile – cập nhật tên, ngày sinh, avatar – không động mật khẩu
     suspend fun updateProfile(id: Long, name: String, birthDate: String?, avatarUrl: String?) {
         val user = userDao.getById(id) ?: return
         val updatedUser = user.copy(
             name = name.trim(),
             birthDate = birthDate,
-            avatarUrl = avatarUrl
+            avatarUrl = avatarUrl,
+            updatedAt = System.currentTimeMillis()
         )
         userDao.update(updatedUser)
     }
 
-    /** Đổi mật khẩu */
+    // changePassword – đổi mật khẩu local – hash lại bằng BCrypt
     suspend fun changePassword(userId: Long, newPassword: String) {
-        require(newPassword.length >= 6) { "short_password" }
+        require(newPassword.length >= 6)
         val hash = Security.hashPassword(newPassword.toCharArray())
         userDao.updatePasswordHash(userId, hash)
     }

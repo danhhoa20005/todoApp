@@ -70,6 +70,10 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE is_logged_in = 1 LIMIT 1")
     suspend fun getLoggedInUser(): User?
 
+    // Tìm user theo uid Firebase (remote_id)
+    @Query("SELECT * FROM users WHERE remote_id = :remoteId LIMIT 1")
+    suspend fun getByRemoteId(remoteId: String): User?
+
     // Gộp thao tác clear + set vào 1 transaction cho an toàn
     @Transaction
     suspend fun switchLoggedIn(newUserId: Long) {

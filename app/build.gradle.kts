@@ -9,18 +9,16 @@ plugins {
 android {
     namespace = "com.example.appmanagement"
 
-    // phải là 36 để satisfy androidx.activity:1.11.0, core-ktx:1.17.0
+    // compileSdk 36 để dùng được các thư viện AndroidX mới
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.appmanagement"
 
-        // bạn đang build cho Android 13+ only, vẫn ok
+        // chỉ hỗ trợ từ Android 13 trở lên
         minSdk = 33
 
-        // GIỮ targetSdk thấp (34) để:
-        // - tránh bị bắt tuân theo policy 16KB page size của Android 15+
-        // - không dính lại lỗi libsqlcipher.so (mà ta đã gỡ)
+        // targetSdk 34 để tránh các ràng buộc mới của Android 15
         targetSdk = 34
 
         versionCode = 1
@@ -58,7 +56,7 @@ android {
 }
 
 dependencies {
-    // Version Catalog deps
+    // thư viện trong version catalog
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -69,17 +67,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // BCrypt (hash password/PIN -> không native page-size issue)
+    // BCrypt để băm mật khẩu/PIN
     implementation("at.favre.lib:bcrypt:0.10.2")
 
-    // ĐÃ GỠ SQLCipher để tránh libsqlcipher.so 16KB warning
-    // implementation("net.zetetic:android-database-sqlcipher:4.5.4")
-    // implementation("androidx.sqlite:sqlite:2.4.0")
-
-    // EncryptedSharedPreferences cho data nhạy cảm nhỏ
+    // EncryptedSharedPreferences cho dữ liệu nhạy cảm nhỏ
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // Room (DB local, không mã hóa full-file, không kéo lib native nguy hiểm)
+    // Room (cơ sở dữ liệu cục bộ)
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
@@ -97,4 +91,22 @@ dependencies {
 
     // Glide (load ảnh)
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Firebase: dùng BoM để đồng bộ phiên bản
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+
+    // Firebase Analytics (tuỳ chọn)
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    // Firebase Auth (đăng nhập, có FirebaseUser)
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Firestore (sau này lưu User/Task)
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Hỗ trợ dùng .await() với Task của Firebase trong coroutine
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+
+    // Đăng nhập Google (nút Sign in with Google)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 }

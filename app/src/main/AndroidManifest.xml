@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- // Khai báo manifest ứng dụng Android bao gồm quyền truy cập và activity chính -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Quyền mạng (Firebase, API,...) -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Quyền hiện thông báo (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Quyền dùng exact alarm (AlarmManager.setExact / setExactAndAllowWhileIdle) -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <!-- (Tùy chọn) chỉ khi thực sự cần cho Android 13+ -->
+    <!-- <uses-permission android:name="android.permission.USE_EXACT_ALARM" /> -->
 
     <application
         android:allowBackup="true"
@@ -15,6 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppManagement">
 
+        <!-- Activity chính -->
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true"
@@ -25,15 +34,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Receiver nhận alarm và hiển thị thông báo -->
         <receiver
             android:name=".notifications.TaskReminderReceiver"
             android:exported="false" />
 
-
+        <!-- Facebook SDK (nếu có dùng) -->
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
-
 
     </application>
 </manifest>
