@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
+import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentOnboardBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -27,6 +29,7 @@ class OnboardFragment : Fragment() {
 
     // ViewModel lưu user vào Room
     private val viewModel: SignInViewModel by viewModels()
+    private val taskViewModel: TaskViewModel by activityViewModels()
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -109,6 +112,7 @@ class OnboardFragment : Fragment() {
                     firebaseUser = firebaseUser,
                     onSuccess = { user ->
                         toast("Xin chào ${user.name}!")
+                        taskViewModel.syncTasksForCurrentUser()
                         findNavController().navigate(R.id.homeFragment)
                     },
                     onError = {

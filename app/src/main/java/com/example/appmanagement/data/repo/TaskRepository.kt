@@ -2,15 +2,23 @@
 package com.example.appmanagement.data.repo
 
 import com.example.appmanagement.data.dao.TaskDao
+import com.example.appmanagement.data.dao.UserDao
 import com.example.appmanagement.data.entity.Task
+import com.example.appmanagement.data.entity.User
+import com.example.appmanagement.data.remote.TaskRemoteDataSource
 
-class TaskRepository(private val dao: TaskDao) {
+class TaskRepository(
+    private val dao: TaskDao,
+    private val userDao: UserDao? = null,
+    private val remoteDataSource: TaskRemoteDataSource? = null
+) {
 
     fun all(userId: Long) = dao.getByUserOrdered(userId)
     fun uncompleted(userId: Long) = dao.getUncompletedOrdered(userId)
     fun completed(userId: Long) = dao.getCompletedOrdered(userId)
     fun byDate(userId: Long, date: String) = dao.getByDate(userId, date)
     fun byId(id: Long) = dao.getByIdLive(id)
+    fun observeTasksByUserId(userId: Long) = dao.observeTasksByUserId(userId)
 
     suspend fun add(
         userId: Long,
@@ -19,22 +27,92 @@ class TaskRepository(private val dao: TaskDao) {
         taskDate: String,
         startTime: String,
         endTime: String
-    ): Long = dao.insert(
-        Task(
+    ): Long {
+        val now = System.currentTimeMillis()
+        val newTask = Task(
             userId = userId,
             title = title.trim(),
             description = description.trim(),
             taskDate = taskDate,
             startTime = startTime,
             endTime = endTime,
-            orderIndex = Int.MAX_VALUE
+            orderIndex = Int.MAX_VALUE,
+            updatedAt = now,
+            createdAt = now
         )
-    )
+        val id = dao.insert(newTask)
+        val savedTask = newTask.copy(id = id)
+        syncRemote(userId, savedTask)
+        return id
+    }
 
-    suspend fun update(task: Task) = dao.update(task)
-    suspend fun delete(task: Task) = dao.delete(task)
-    suspend fun toggle(task: Task) = dao.setCompleted(task.id, !task.isCompleted)
+    suspend fun addTask(user: User, task: Task): Task {
+        val now = System.currentTimeMillis()
+        val toSave = task.copy(userId = user.id, updatedAt = now, createdAt = task.createdAt)
+        val id = dao.insert(toSave)
+        val saved = toSave.copy(id = id)
+        val synced = syncRemote(user.id, saved)
+        return synced ?: saved
+    }
 
-    suspend fun updateOrderIndex(id: Long, index: Int) = dao.updateOrderIndex(id, index)
-    suspend fun updateOrderMany(pairs: List<Pair<Long, Int>>) = dao.updateOrderMany(pairs)
+    suspend fun update(task: Task) {
+        val updated = task.copy(updatedAt = System.currentTimeMillis())
+        dao.update(updated)
+        syncRemote(task.userId, updated)
+    }
+
+    suspend fun delete(task: Task) {
+        dao.delete(task)
+        val userRemoteId = getUserRemoteId(task.userId)
+        if (!task.remoteId.isNullOrBlank() && !userRemoteId.isNullOrBlank()) {
+            remoteDataSource?.deleteTask(task.remoteId)
+        }
+    }
+
+    suspend fun toggle(task: Task) {
+        val toggled = task.copy(isCompleted = !task.isCompleted, updatedAt = System.currentTimeMillis())
+        dao.update(toggled)
+        syncRemote(task.userId, toggled)
+    }
+
+    suspend fun updateOrderIndex(id: Long, index: Int) {
+        val task = dao.getByIdOnce(id) ?: return
+        val updated = task.copy(orderIndex = index, updatedAt = System.currentTimeMillis())
+        dao.update(updated)
+        syncRemote(task.userId, updated)
+    }
+
+    suspend fun updateOrderMany(pairs: List<Pair<Long, Int>>) {
+        pairs.forEach { (id, idx) -> updateOrderIndex(id, idx) }
+    }
+
+    suspend fun syncFromRemote(user: User) {
+        val userRemoteId = user.remoteId ?: return
+        val remoteTasks = remoteDataSource?.fetchTasks(userRemoteId).orEmpty()
+        remoteTasks.forEach { remoteTask ->
+            val existing = remoteTask.remoteId?.let { dao.getByRemoteId(it) }
+            val taskForUser = remoteTask.copy(userId = user.id)
+            if (existing == null) {
+                dao.insert(taskForUser)
+            } else if (remoteTask.updatedAt >= existing.updatedAt) {
+                dao.update(taskForUser.copy(id = existing.id))
+            }
+        }
+    }
+
+    private suspend fun syncRemote(userId: Long, task: Task): Task? {
+        val userRemoteId = getUserRemoteId(userId) ?: return null
+        val remoteId = remoteDataSource?.upsertTask(userRemoteId, task) ?: return null
+        if (remoteId != task.remoteId) {
+            val updatedTask = task.copy(remoteId = remoteId)
+            dao.update(updatedTask)
+            return updatedTask
+        }
+        return task
+    }
+
+    private suspend fun getUserRemoteId(userId: Long): String? {
+        val user = userDao?.getById(userId)
+        return user?.remoteId
+    }
 }
