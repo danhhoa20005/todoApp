@@ -16,6 +16,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE user_id = :userId ORDER BY id DESC")
     fun getByUser(userId: Long): LiveData<List<Task>>
 
+    @Query("SELECT * FROM tasks WHERE user_id = :userId ORDER BY task_date, start_time, order_index")
+    fun observeTasksByUserId(userId: Long): LiveData<List<Task>>
+
     // LiveData theo id (nullable để dễ check null khi observe)
     @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
     fun getByIdLive(id: Long): LiveData<Task?>
@@ -23,6 +26,9 @@ interface TaskDao {
     // Dùng trong coroutine (IO) để lấy 1 lần
     @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
     suspend fun getByIdOnce(id: Long): Task?
+
+    @Query("SELECT * FROM tasks WHERE remote_id = :remoteId LIMIT 1")
+    suspend fun getByRemoteId(remoteId: String): Task?
 
     // Lọc theo trạng thái
     @Query("SELECT * FROM tasks WHERE user_id = :userId AND is_completed = 0 ORDER BY id DESC")
