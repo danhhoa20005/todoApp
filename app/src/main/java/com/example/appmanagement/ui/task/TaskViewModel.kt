@@ -11,6 +11,8 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import com.example.appmanagement.data.remote.TaskRemoteDataSource
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,7 +20,13 @@ import kotlinx.coroutines.withContext
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database by lazy { AppDatabase.getInstance(application) }
-    private val taskRepository by lazy { TaskRepository(database.taskDao()) }
+    private val taskRepository by lazy {
+        TaskRepository(
+            database.taskDao(),
+            database.userDao(),
+            TaskRemoteDataSource(FirebaseFirestore.getInstance())
+        )
+    }
     private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
     private val currentUserId = MutableLiveData<Long?>()

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
+import com.example.appmanagement.data.repo.GoogleLoginResult
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -78,12 +79,12 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
     // loginWithGoogleUser – nhận FirebaseUser – gọi repo.loginWithGoogleAccount – trả User về callback
     fun loginWithGoogleUser(
         firebaseUser: FirebaseUser,
-        onSuccess: (User) -> Unit,
+        onSuccess: (User, Boolean) -> Unit,
         onError: (Throwable) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                val user = withContext(Dispatchers.IO) {
+                val result: GoogleLoginResult = withContext(Dispatchers.IO) {
                     accountRepository.loginWithGoogleAccount(
                         uid = firebaseUser.uid,
                         email = firebaseUser.email,
@@ -91,7 +92,7 @@ class SignInViewModel(app: Application) : AndroidViewModel(app) {
                         avatarUrl = firebaseUser.photoUrl?.toString()
                     )
                 }
-                onSuccess(user)
+                onSuccess(result.user, result.isExisting)
             } catch (e: Throwable) {
                 onError(e)
             }

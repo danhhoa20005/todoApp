@@ -14,8 +14,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
+import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import com.google.firebase.firestore.FirebaseFirestore
 import com.example.appmanagement.databinding.FragmentTodayBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +53,11 @@ class TodayFragment : Fragment() {
         val appContext = requireContext().applicationContext
         val db = AppDatabase.getInstance(appContext)
         val accountRepo = AccountRepository(db.userDao())
-        taskRepo = TaskRepository(db.taskDao())
+        taskRepo = TaskRepository(
+            db.taskDao(),
+            db.userDao(),
+            TaskRemoteDataSource(FirebaseFirestore.getInstance())
+        )
 
         taskAdapter = TaskAdapter(
             onEditClick = { task ->

@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
+import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentOnboardBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -27,6 +29,7 @@ class OnboardFragment : Fragment() {
 
     // ViewModel lưu user vào Room
     private val viewModel: SignInViewModel by viewModels()
+    private val taskViewModel: TaskViewModel by activityViewModels()
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -88,8 +91,10 @@ class OnboardFragment : Fragment() {
 
         // tiếp tục bằng Google
         binding.btgmail.setOnClickListener {
-            val intent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(intent)
+            googleSignInClient.signOut().addOnCompleteListener {
+                val intent = googleSignInClient.signInIntent
+                googleSignInLauncher.launch(intent)
+            }
         }
     }
 
@@ -107,9 +112,12 @@ class OnboardFragment : Fragment() {
 
                 viewModel.loginWithGoogleUser(
                     firebaseUser = firebaseUser,
-                    onSuccess = { user ->
+                    onSuccess = { user, isExisting ->
                         toast("Xin chào ${user.name}!")
-                        findNavController().navigate(R.id.homeFragment)
+                        taskViewModel.loadTasksForCurrentUser()
+                        taskViewModel.syncTasksForCurrentUser()
+                        val destination = if (isExisting) R.id.homeFragment else R.id.createWorkFragment
+                        findNavController().navigate(destination)
                     },
                     onError = {
                         toast("Lỗi lưu tài khoản vào hệ thống!")

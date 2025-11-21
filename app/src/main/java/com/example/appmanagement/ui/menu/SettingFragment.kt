@@ -7,16 +7,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
+import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentSettingBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.lifecycle.lifecycleScope
 import com.example.appmanagement.util.AppGlobals
 import com.example.appmanagement.util.ThemeManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 
 import kotlinx.coroutines.launch
 
@@ -26,6 +31,7 @@ class SettingFragment : Fragment() {
     private val b get() = _binding!!
 
     private val args: SettingFragmentArgs by navArgs()
+    private val taskViewModel: TaskViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -94,6 +100,15 @@ class SettingFragment : Fragment() {
                 withContext(Dispatchers.IO) {
                     AppDatabase.getInstance(requireContext()).userDao().clearLoggedIn()
                 }
+
+                // sign out khỏi Google/Firebase để luôn hiện hộp chọn tài khoản khi đăng nhập lại
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build()
+                GoogleSignIn.getClient(requireContext(), gso).signOut()
+                FirebaseAuth.getInstance().signOut()
+                taskViewModel.clearSession()
 
                 // reset biến toàn cục
                 AppGlobals.isLoggedIn = false

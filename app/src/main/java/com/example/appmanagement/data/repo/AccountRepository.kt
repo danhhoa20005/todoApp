@@ -5,6 +5,11 @@ import com.example.appmanagement.data.dao.UserDao
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.util.Security
 
+data class GoogleLoginResult(
+    val user: User,
+    val isExisting: Boolean
+)
+
 class AccountRepository(
     private val userDao: UserDao
 ) {
@@ -70,7 +75,7 @@ class AccountRepository(
         email: String?,
         name: String?,
         avatarUrl: String?
-    ): User {
+    ): GoogleLoginResult {
         val safeEmail = (email ?: "$uid@firebase.local").trim()
         val safeName = (name ?: safeEmail.substringBefore("@")).trim()
 
@@ -89,7 +94,7 @@ class AccountRepository(
                 updatedAt = System.currentTimeMillis()
             )
             userDao.update(updated)
-            updated
+            GoogleLoginResult(updated, true)
 
         } else {
             // lần đầu đăng nhập Google -> tạo user mới
@@ -107,7 +112,7 @@ class AccountRepository(
                 updatedAt = System.currentTimeMillis()
             )
             val newId = userDao.insert(newUser)
-            newUser.copy(id = newId)
+            GoogleLoginResult(newUser.copy(id = newId), false)
         }
     }
 

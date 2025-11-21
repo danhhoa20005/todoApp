@@ -57,6 +57,9 @@ class HomeFragment : Fragment() {
 
         showCards(true)
 
+        vm.loadTasksForCurrentUser()
+        vm.syncTasksForCurrentUser()
+
         val db = AppDatabase.getInstance(requireContext())
         val repo = AccountRepository(db.userDao())
 
