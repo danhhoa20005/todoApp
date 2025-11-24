@@ -1,18 +1,16 @@
 // ViewModel TaskViewModel điều phối dữ liệu công việc, lọc theo trạng thái và tính toán thống kê tuần
 package com.example.appmanagement.data.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
-import com.example.appmanagement.data.remote.TaskRemoteDataSource
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,17 +19,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
-class TaskViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val database by lazy { AppDatabase.getInstance(application) }
-    private val taskRepository by lazy {
-        TaskRepository(
-            database.taskDao(),
-            database.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
-        )
-    }
-    private val accountRepository by lazy { AccountRepository(database.userDao()) }
+@HiltViewModel
+class TaskViewModel @Inject constructor(
+    private val taskRepository: TaskRepository,
+    private val accountRepository: AccountRepository
+) : ViewModel() {
 
     private var currentUser: User? = null
 
@@ -122,7 +114,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         endTime: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         val user = getCurrentUserSafe() ?: return@launch
-        taskRepository.add(user.id, title, description, taskDate, startTime, endTime)
+        taskRepository.add(user, title, description, taskDate, startTime, endTime)
     }
 
     /** Cập nhật Task */
@@ -191,7 +183,7 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private suspend fun getCurrentUserSafe(): User? {
+    suspend fun getCurrentUserSafe(): User? {
         val cached = currentUser
         if (cached != null) return cached
         val refreshed = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
