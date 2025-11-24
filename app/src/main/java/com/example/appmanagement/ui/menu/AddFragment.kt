@@ -13,10 +13,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
-import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
+import com.example.appmanagement.data.remote.TaskRemoteDataSource
+import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentAddBinding
 import com.example.appmanagement.notifications.NotificationScheduler
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -115,7 +117,8 @@ class AddFragment : Fragment() {
         // -----------------------------------------
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext().applicationContext)
+            val appContext = requireContext().applicationContext
+            val db = AppDatabase.getInstance(appContext)
             val currentUser = withContext(Dispatchers.IO) {
                 AccountRepository(db.userDao()).getCurrentUser()
             }
@@ -124,22 +127,26 @@ class AddFragment : Fragment() {
                 return@launch
             }
 
-            val task = Task(
-                id = 0L,
-                userId = currentUser.id,
-                title = title,
-                description = detail,   // khớp entity: dùng 'description'
-                isCompleted = false,
-                taskDate = date,
-                startTime = start,
-                endTime = end
+            val taskRepository = TaskRepository(
+                dao = db.taskDao(),
+                userDao = db.userDao(),
+                remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance())
             )
 
-            val insertedId = withContext(Dispatchers.IO) { db.taskDao().insert(task) }
+            val insertedId = withContext(Dispatchers.IO) {
+                taskRepository.add(
+                    user = currentUser,
+                    title = title,
+                    description = detail,
+                    taskDate = date,
+                    startTime = start,
+                    endTime = end
+                )
+            }
             if (insertedId > 0) {
                 if (startObj != null && dateObj != null) {
                     NotificationScheduler.scheduleTaskReminder(
-                        context = requireContext().applicationContext,
+                        context = appContext,
                         taskId = insertedId,
                         title = title,
                         date = date,

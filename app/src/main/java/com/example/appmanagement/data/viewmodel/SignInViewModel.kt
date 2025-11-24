@@ -77,12 +77,12 @@ class SignInViewModel @Inject constructor(
     // loginWithGoogleUser – nhận FirebaseUser – gọi repo.loginWithGoogleAccount – trả User về callback
     fun loginWithGoogleUser(
         firebaseUser: FirebaseUser,
-        onSuccess: (User) -> Unit,
+        onSuccess: (User, Boolean) -> Unit,
         onError: (Throwable) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                val user = withContext(Dispatchers.IO) {
+                val result = withContext(Dispatchers.IO) {
                     accountRepository.loginWithGoogleAccount(
                         uid = firebaseUser.uid,
                         email = firebaseUser.email,
@@ -90,7 +90,7 @@ class SignInViewModel @Inject constructor(
                         avatarUrl = firebaseUser.photoUrl?.toString()
                     )
                 }
-                onSuccess(user)
+                onSuccess(result.user, result.isNewUser)
             } catch (e: Throwable) {
                 onError(e)
             }
