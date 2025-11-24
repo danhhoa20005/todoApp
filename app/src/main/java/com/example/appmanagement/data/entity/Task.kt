@@ -1,4 +1,4 @@
-// Định nghĩa thực thể Task dùng Room để lưu trữ thông tin công việc gắn với người dùng
+// Thực thể Task lưu thông tin công việc gắn với người dùng
 package com.example.appmanagement.data.entity
 
 import androidx.room.*
@@ -13,46 +13,49 @@ import androidx.room.*
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["user_id"])]
+    indices = [
+        Index(value = ["user_id"]),
+        Index(value = ["user_remote_id"])
+    ]
 )
 data class Task(
 
-    // Khóa chính tự tăng
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0L,
+    val id: Long = 0L,               // id tự tăng
 
-    // Khóa ngoại tham chiếu user
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    val userId: Long,                // id user sở hữu task
+
+    @ColumnInfo(name = "user_remote_id")
+    val userRemoteId: String? = null,// uid Firebase của user để sync Firestore
 
     @ColumnInfo(name = "order_index")
-    val orderIndex: Int = 0,
+    val orderIndex: Int = 0,         // thứ tự hiển thị
 
-    // Tiêu đề công việc
     @ColumnInfo(name = "title")
-    val title: String,
+    val title: String,               // tiêu đề công việc
 
-    // Mô tả chi tiết
     @ColumnInfo(name = "description")
-    val description: String = "",
+    val description: String = "",    // mô tả chi tiết
 
-    // Cờ trạng thái hoàn thành
     @ColumnInfo(name = "is_completed")
-    val isCompleted: Boolean = false,
+    val isCompleted: Boolean = false,// đã hoàn thành hay chưa
 
-    // Ngày thực hiện (ví dụ: "2025-10-04")
     @ColumnInfo(name = "task_date")
-    val taskDate: String = "",
+    val taskDate: String = "",       // ngày thực hiện (yyyy-MM-dd)
 
-    // Thời gian bắt đầu (ví dụ: "08:30")
     @ColumnInfo(name = "start_time")
-    val startTime: String = "",
+    val startTime: String = "",      // giờ bắt đầu (HH:mm)
 
-    // Thời gian kết thúc (ví dụ: "10:00")
     @ColumnInfo(name = "end_time")
-    val endTime: String = "",
+    val endTime: String = "",        // giờ kết thúc (HH:mm)
 
-    // Thời điểm tạo (mặc định = thời gian hiện tại)
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(), // thời điểm tạo
+
+    @ColumnInfo(name = "remote_id")
+    val remoteId: String? = null,    // id document trên Firestore
+
+    @ColumnInfo(name = "updated_at")
+    val updatedAt: Long = System.currentTimeMillis()  // thời điểm cập nhật gần nhất
 )

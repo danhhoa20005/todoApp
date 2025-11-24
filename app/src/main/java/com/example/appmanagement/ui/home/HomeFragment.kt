@@ -10,14 +10,12 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.appmanagement.R
-import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
-import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentHomeBinding
 import com.example.appmanagement.ui.menu.TaskAdapter
@@ -29,13 +27,15 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
     private var _b: FragmentHomeBinding? = null
     private val b get() = _b!!
 
-    private lateinit var vm: TaskViewModel
+    private val vm: TaskViewModel by activityViewModels()
     private lateinit var searchAdapter: TaskAdapter
 
     override fun onCreateView(
@@ -44,7 +44,6 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _b = FragmentHomeBinding.inflate(inflater, container, false)
-        vm = ViewModelProvider(requireActivity())[TaskViewModel::class.java]
         return b.root
     }
 
@@ -57,12 +56,12 @@ class HomeFragment : Fragment() {
 
         showCards(true)
 
-        val db = AppDatabase.getInstance(requireContext())
-        val repo = AccountRepository(db.userDao())
+        vm.loadTasksForCurrentUser()
+        vm.syncTasksForCurrentUser()
 
         // User + avatar
         viewLifecycleOwner.lifecycleScope.launch {
-            val u = withContext(Dispatchers.IO) { repo.getCurrentUser() }
+            val u = withContext(Dispatchers.IO) { vm.getCurrentUserSafe() }
             if (u != null) {
                 b.tvHello.text = "${u.name}'s manager"
                 when (u.avatarUrl) {
@@ -113,15 +112,11 @@ class HomeFragment : Fragment() {
                 )
             },
             onDeleteClick = { task ->
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    db.taskDao().delete(task)
-                }
+                vm.deleteTask(task)
             },
             onCheckClick = { task ->
                 // Cập nhật DB; UI sẽ tự đồng bộ lại qua observer ở trên
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    db.taskDao().setCompleted(task.id, !task.isCompleted)
-                }
+                vm.toggleTask(task)
             }
         )
 

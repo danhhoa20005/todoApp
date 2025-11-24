@@ -11,6 +11,9 @@
     <string name="setting_dark_mode">Chế độ tối</string>
     <string name="setting_light_mode">Chế độ sáng</string>
 
-
+    <string name="notify_task_channel_name">Nhắc giờ bắt đầu</string>
+    <string name="notify_task_channel_desc">Báo khi đến giờ bắt đầu của công việc</string>
+    <string name="notify_task_start_prefix">Đã đến giờ bắt đầu</string>
+    <string name="default_web_client_id">YOUR_CLIENT_ID.apps.googleusercontent.com</string>
 
 </resources>
