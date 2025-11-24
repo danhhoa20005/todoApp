@@ -87,8 +87,13 @@ class HomeFragment : Fragment() {
             // 1) Thống kê hôm nay
             applyTodayStats(data)
 
-            // 2) Biểu đồ tuần (full cột = 30 task)
-            val counts = WeekChart.computeWeekCounts(data)
+            // 3) Cập nhật kết quả tìm kiếm theo text hiện tại
+            submitSearch(data, b.etSearch.text?.toString().orEmpty())
+        }
+
+        vm.tasksDone.observe(viewLifecycleOwner) { completed ->
+            val done = completed.orEmpty()
+            val counts = WeekChart.computeWeekCounts(done)
             WeekChart.render(
                 rowBars = b.rowBars,
                 bars = listOf(b.barMon, b.barTue, b.barWed, b.barThu, b.barFri, b.barSat, b.barSun),
@@ -98,9 +103,7 @@ class HomeFragment : Fragment() {
                 onBarClick = { onDayClicked(it) },
                 fullScaleCap = 20
             )
-
-            // 3) Cập nhật kết quả tìm kiếm theo text hiện tại
-            submitSearch(data, b.etSearch.text?.toString().orEmpty())
+            b.tvCompleted.text = done.size.toString()
         }
         vm.filterByDate(toDayString())
 
@@ -187,7 +190,6 @@ class HomeFragment : Fragment() {
         val todayTasks = all.filter { it.taskDate.toDateOrNull() == today }
         val todayDone = todayTasks.count { it.isCompleted }
         val todayTotal = todayTasks.size
-        val doneTotal = all.count { it.isCompleted }
 
         b.tvPrioritySub.text = getString(R.string.today_completed_sub, todayDone, todayTotal)
 
@@ -195,8 +197,6 @@ class HomeFragment : Fragment() {
         val percent = percentRaw.coerceIn(0.0, 100.0)
         b.progress.setProgressCompat(percent.roundToInt(), false)
         b.tvPercent.text = getString(R.string.percent_format, percent)
-
-        b.tvCompleted.text = doneTotal.toString()
     }
 
     private fun onDayClicked(index: Int) {

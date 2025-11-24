@@ -14,7 +14,7 @@ import com.example.appmanagement.data.entity.User
 
 @Database(
     entities = [User::class, Task::class],
-    version = 2,            // tăng version 1 -> 2 vì đã thêm cột mới
+    version = 3,            // tăng version khi thay đổi schema
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +39,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // thêm cột user_remote_id để liên kết với uid Firebase
+                db.execSQL("ALTER TABLE tasks ADD COLUMN user_remote_id TEXT")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -47,7 +54,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "todo.db"            // tên file cơ sở dữ liệu
                 )
                     // dùng migration để giữ lại dữ liệu cũ khi nâng version
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance

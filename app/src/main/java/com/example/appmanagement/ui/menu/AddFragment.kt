@@ -13,11 +13,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
-import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.repo.AccountRepository
+import com.example.appmanagement.data.remote.TaskRemoteDataSource
+import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentAddBinding
 import com.example.appmanagement.notifications.NotificationScheduler
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -30,6 +33,9 @@ class AddFragment : Fragment() {
 
     private var _binding: FragmentAddBinding? = null
     private val binding get() = _binding!!
+
+    private var isSaving = false
+    private var addJob: Job? = null
 
     private val dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
@@ -56,6 +62,8 @@ class AddFragment : Fragment() {
     }
 
     private fun addTask() {
+        if (isSaving || addJob?.isActive == true) return
+
         val title = binding.edtTitle.text?.toString()?.trim().orEmpty()
         val detail = binding.edtDetail.text?.toString()?.trim().orEmpty()
         val date = binding.edtDate.text?.toString()?.trim().orEmpty()
@@ -114,44 +122,63 @@ class AddFragment : Fragment() {
         if (!ok) return
         // -----------------------------------------
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext().applicationContext)
-            val currentUser = withContext(Dispatchers.IO) {
-                AccountRepository(db.userDao()).getCurrentUser()
-            }
-            if (currentUser == null) {
-                Toast.makeText(requireContext(), "Chưa có người dùng đăng nhập", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
+        setSaving(true)
+        addJob = viewLifecycleOwner.lifecycleScope.launch {
+            val appContext = requireContext().applicationContext
+            try {
+                val db = AppDatabase.getInstance(appContext)
+                val currentUser = withContext(Dispatchers.IO) {
+                    AccountRepository(db.userDao()).getCurrentUser()
+                }
+                if (currentUser == null) {
+                    Toast.makeText(requireContext(), "Chưa có người dùng đăng nhập", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
 
-            val task = Task(
-                id = 0L,
-                userId = currentUser.id,
-                title = title,
-                description = detail,   // khớp entity: dùng 'description'
-                isCompleted = false,
-                taskDate = date,
-                startTime = start,
-                endTime = end
-            )
+                val taskRepository = TaskRepository(
+                    dao = db.taskDao(),
+                    userDao = db.userDao(),
+                    remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance())
+                )
 
-            val insertedId = withContext(Dispatchers.IO) { db.taskDao().insert(task) }
-            if (insertedId > 0) {
-                if (startObj != null && dateObj != null) {
-                    NotificationScheduler.scheduleTaskReminder(
-                        context = requireContext().applicationContext,
-                        taskId = insertedId,
+                val insertedId = withContext(Dispatchers.IO) {
+                    taskRepository.add(
+                        user = currentUser,
                         title = title,
-                        date = date,
-                        startTime = start
+                        description = detail,
+                        taskDate = date,
+                        startTime = start,
+                        endTime = end
                     )
                 }
-                Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_addFragment_to_homeFragment)
-            } else {
-                Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                if (insertedId > 0) {
+                    if (startObj != null && dateObj != null) {
+                        NotificationScheduler.scheduleTaskReminder(
+                            context = appContext,
+                            taskId = insertedId,
+                            title = title,
+                            date = date,
+                            startTime = start
+                        )
+                    }
+                    Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_addFragment_to_homeFragment)
+                } else {
+                    Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                }
+            } catch (t: Throwable) {
+                Toast.makeText(requireContext(), "Thêm thất bại: ${t.message ?: "Lỗi không xác định"}", Toast.LENGTH_SHORT).show()
+            } finally {
+                setSaving(false)
+                addJob = null
             }
         }
+    }
+
+    private fun setSaving(saving: Boolean) {
+        isSaving = saving
+        binding.btnAddTask.isEnabled = !saving
+        binding.btnAddTask.alpha = if (saving) 0.6f else 1f
     }
 
     private fun showDatePicker() {

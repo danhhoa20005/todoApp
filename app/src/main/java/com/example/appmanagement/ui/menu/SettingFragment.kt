@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.appmanagement.R
 import com.example.appmanagement.data.db.AppDatabase
+import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.databinding.FragmentSettingBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,6 +20,10 @@ import com.example.appmanagement.util.AppGlobals
 import com.example.appmanagement.util.ThemeManager
 
 import kotlinx.coroutines.launch
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
 
 class SettingFragment : Fragment() {
 
@@ -40,6 +45,15 @@ class SettingFragment : Fragment() {
         val context = requireContext()
         val db = AppDatabase.getInstance(context)
         val userDao = db.userDao()
+        val accountRepository = AccountRepository(userDao)
+        val auth = FirebaseAuth.getInstance()
+        val googleSignInClient = GoogleSignIn.getClient(
+            context,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+        )
 
         // Lấy user theo userId (suspend) rồi đổ UI
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
@@ -90,21 +104,21 @@ class SettingFragment : Fragment() {
         // Logout -> Onboard (đã có action trong nav_graph)
         b.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                // xóa cờ is_logged_in trong DB
                 withContext(Dispatchers.IO) {
-                    AppDatabase.getInstance(requireContext()).userDao().clearLoggedIn()
+                    runCatching { accountRepository.logout() }
+                    runCatching { Tasks.await(googleSignInClient.signOut()) }
+                    runCatching { Tasks.await(googleSignInClient.revokeAccess()) }
                 }
 
-                // reset biến toàn cục
+                auth.signOut()
+
                 AppGlobals.isLoggedIn = false
                 AppGlobals.currentUserId = null
 
-                // điều hướng và dọn stack
                 findNavController().navigate(
                     R.id.onboardFragment,
                     null,
                     androidx.navigation.navOptions {
-                        // pop sạch về Splash để không quay lại Home/Setting được nữa
                         popUpTo(R.id.plashOnboardFragment) { inclusive = true }
                     }
                 )

@@ -10,6 +10,7 @@ class TaskRemoteDataSource(
 
     private val collection get() = firestore.collection("tasks")
 
+    // upsertTask: thêm mới hoặc cập nhật task trên Firestore theo userRemoteId
     suspend fun upsertTask(userRemoteId: String, task: Task): String {
         val data = mapOf(
             "userId" to userRemoteId,
@@ -33,10 +34,12 @@ class TaskRemoteDataSource(
         }
     }
 
+    // deleteTask: xoá document task trên Firestore
     suspend fun deleteTask(remoteId: String) {
         Tasks.await(collection.document(remoteId).delete())
     }
 
+    // fetchTasks: lấy danh sách task của 1 user từ Firestore
     suspend fun fetchTasks(userRemoteId: String): List<Task> {
         val snapshot = Tasks.await(collection.whereEqualTo("userId", userRemoteId).get())
         return snapshot.documents.map { doc ->
@@ -44,6 +47,7 @@ class TaskRemoteDataSource(
             Task(
                 id = 0,
                 userId = 0,
+                userRemoteId = data["userId"] as? String,
                 remoteId = doc.id,
                 title = data["title"] as? String ?: "",
                 description = data["description"] as? String ?: "",

@@ -70,11 +70,12 @@ class AccountRepository(
         email: String?,
         name: String?,
         avatarUrl: String?
-    ): User {
+    ): GoogleLoginResult {
         val safeEmail = (email ?: "$uid@firebase.local").trim()
         val safeName = (name ?: safeEmail.substringBefore("@")).trim()
+        val now = System.currentTimeMillis()
 
-        val existing = userDao.getByRemoteId(uid)
+        val existing = userDao.getByRemoteId(uid) ?: userDao.getByEmail(safeEmail)
 
         userDao.clearLoggedIn()
 
@@ -86,10 +87,10 @@ class AccountRepository(
                 avatarUrl = avatarUrl,
                 isLoggedIn = true,
                 remoteId = uid,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = now
             )
             userDao.update(updated)
-            updated
+            GoogleLoginResult(updated, isNewUser = false)
 
         } else {
             // lần đầu đăng nhập Google -> tạo user mới
@@ -104,10 +105,10 @@ class AccountRepository(
                 avatarUrl = avatarUrl,
                 isLoggedIn = true,
                 remoteId = uid,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = now
             )
             val newId = userDao.insert(newUser)
-            newUser.copy(id = newId)
+            GoogleLoginResult(newUser.copy(id = newId), isNewUser = true)
         }
     }
 
@@ -140,3 +141,8 @@ class AccountRepository(
         userDao.updatePasswordHash(userId, hash)
     }
 }
+
+data class GoogleLoginResult(
+    val user: User,
+    val isNewUser: Boolean
+)
