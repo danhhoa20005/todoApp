@@ -1,24 +1,23 @@
 // ViewModel SignInViewModel xử lý đăng nhập và đăng ký bằng cách gọi AccountRepository trong coroutine
 package com.example.appmanagement.data.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SignInViewModel(app: Application) : AndroidViewModel(app) {
-
-    // Data layer
-    private val database by lazy { AppDatabase.getInstance(app) }
-    private val accountRepository by lazy { AccountRepository(database.userDao()) }
+@HiltViewModel
+class SignInViewModel @Inject constructor(
+    private val accountRepository: AccountRepository
+) : ViewModel() {
 
     // Login result: true = success, false = failure
     private val _loginResult = MutableLiveData<Boolean>()

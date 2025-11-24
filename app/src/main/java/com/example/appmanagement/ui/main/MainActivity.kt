@@ -23,7 +23,9 @@ import com.example.appmanagement.R
 import com.example.appmanagement.databinding.ActivityMainBinding
 import com.example.appmanagement.util.ThemeManager
 import com.google.android.material.navigation.NavigationBarView
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

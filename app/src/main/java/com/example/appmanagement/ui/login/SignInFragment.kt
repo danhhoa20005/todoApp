@@ -13,7 +13,9 @@ import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
 import com.example.appmanagement.databinding.FragmentSignInBinding
 import com.example.appmanagement.util.AppGlobals
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignInFragment : Fragment() {
 
     private var _binding: FragmentSignInBinding? = null

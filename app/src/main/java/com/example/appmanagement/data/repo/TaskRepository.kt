@@ -9,8 +9,8 @@ import com.example.appmanagement.data.remote.TaskRemoteDataSource
 
 class TaskRepository(
     private val dao: TaskDao,
-    private val userDao: UserDao? = null,
-    private val remoteDataSource: TaskRemoteDataSource? = null
+    private val userDao: UserDao,
+    private val remoteDataSource: TaskRemoteDataSource
 ) {
 
     fun all(userId: Long) = dao.getByUserOrdered(userId)
@@ -21,7 +21,7 @@ class TaskRepository(
     fun observeTasksByUserId(userId: Long) = dao.observeTasksByUserId(userId)
 
     suspend fun add(
-        userId: Long,
+        user: User,
         title: String,
         description: String,
         taskDate: String,
@@ -30,7 +30,7 @@ class TaskRepository(
     ): Long {
         val now = System.currentTimeMillis()
         val newTask = Task(
-            userId = userId,
+            userId = user.id,
             title = title.trim(),
             description = description.trim(),
             taskDate = taskDate,
@@ -42,7 +42,7 @@ class TaskRepository(
         )
         val id = dao.insert(newTask)
         val savedTask = newTask.copy(id = id)
-        syncRemote(userId, savedTask)
+        syncRemote(user, savedTask)
         return id
     }
 
@@ -51,35 +51,35 @@ class TaskRepository(
         val toSave = task.copy(userId = user.id, updatedAt = now, createdAt = task.createdAt)
         val id = dao.insert(toSave)
         val saved = toSave.copy(id = id)
-        val synced = syncRemote(user.id, saved)
+        val synced = syncRemote(user, saved)
         return synced ?: saved
     }
 
     suspend fun update(task: Task) {
         val updated = task.copy(updatedAt = System.currentTimeMillis())
         dao.update(updated)
-        syncRemote(task.userId, updated)
+        syncRemote(null, updated)
     }
 
     suspend fun delete(task: Task) {
         dao.delete(task)
         val userRemoteId = getUserRemoteId(task.userId)
         if (!task.remoteId.isNullOrBlank() && !userRemoteId.isNullOrBlank()) {
-            remoteDataSource?.deleteTask(task.remoteId)
+            remoteDataSource.deleteTask(task.remoteId)
         }
     }
 
     suspend fun toggle(task: Task) {
         val toggled = task.copy(isCompleted = !task.isCompleted, updatedAt = System.currentTimeMillis())
         dao.update(toggled)
-        syncRemote(task.userId, toggled)
+        syncRemote(null, toggled)
     }
 
     suspend fun updateOrderIndex(id: Long, index: Int) {
         val task = dao.getByIdOnce(id) ?: return
         val updated = task.copy(orderIndex = index, updatedAt = System.currentTimeMillis())
         dao.update(updated)
-        syncRemote(task.userId, updated)
+        syncRemote(null, updated)
     }
 
     suspend fun updateOrderMany(pairs: List<Pair<Long, Int>>) {
@@ -88,7 +88,7 @@ class TaskRepository(
 
     suspend fun syncFromRemote(user: User) {
         val userRemoteId = user.remoteId ?: return
-        val remoteTasks = remoteDataSource?.fetchTasks(userRemoteId).orEmpty()
+        val remoteTasks = remoteDataSource.fetchTasks(userRemoteId)
         remoteTasks.forEach { remoteTask ->
             val existing = remoteTask.remoteId?.let { dao.getByRemoteId(it) }
             val taskForUser = remoteTask.copy(userId = user.id)
@@ -100,9 +100,9 @@ class TaskRepository(
         }
     }
 
-    private suspend fun syncRemote(userId: Long, task: Task): Task? {
-        val userRemoteId = getUserRemoteId(userId) ?: return null
-        val remoteId = remoteDataSource?.upsertTask(userRemoteId, task) ?: return null
+    private suspend fun syncRemote(user: User?, task: Task): Task? {
+        val userRemoteId = user?.remoteId ?: getUserRemoteId(task.userId) ?: return null
+        val remoteId = remoteDataSource.upsertTask(userRemoteId, task)
         if (remoteId != task.remoteId) {
             val updatedTask = task.copy(remoteId = remoteId)
             dao.update(updatedTask)
@@ -112,7 +112,7 @@ class TaskRepository(
     }
 
     private suspend fun getUserRemoteId(userId: Long): String? {
-        val user = userDao?.getById(userId)
+        val user = userDao.getById(userId)
         return user?.remoteId
     }
 }

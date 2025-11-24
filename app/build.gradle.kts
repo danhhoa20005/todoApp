@@ -4,6 +4,7 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.gms.google-services")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -109,4 +110,9 @@ dependencies {
 
     // Đăng nhập Google (nút Sign in with Google)
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // Hilt (Dependency Injection)
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
 }
