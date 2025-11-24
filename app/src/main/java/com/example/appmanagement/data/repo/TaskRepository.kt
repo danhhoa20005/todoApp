@@ -31,6 +31,7 @@ class TaskRepository(
         val now = System.currentTimeMillis()
         val newTask = Task(
             userId = user.id,
+            userRemoteId = user.remoteId,
             title = title.trim(),
             description = description.trim(),
             taskDate = taskDate,
@@ -48,7 +49,12 @@ class TaskRepository(
 
     suspend fun addTask(user: User, task: Task): Task {
         val now = System.currentTimeMillis()
-        val toSave = task.copy(userId = user.id, updatedAt = now, createdAt = task.createdAt)
+        val toSave = task.copy(
+            userId = user.id,
+            userRemoteId = user.remoteId ?: task.userRemoteId,
+            updatedAt = now,
+            createdAt = task.createdAt
+        )
         val id = dao.insert(toSave)
         val saved = toSave.copy(id = id)
         val synced = syncRemote(user, saved)
@@ -63,7 +69,7 @@ class TaskRepository(
 
     suspend fun delete(task: Task) {
         dao.delete(task)
-        val userRemoteId = getUserRemoteId(task.userId)
+        val userRemoteId = resolveRemoteUserId(null, task)
         if (!task.remoteId.isNullOrBlank() && !userRemoteId.isNullOrBlank()) {
             remoteDataSource.deleteTask(task.remoteId)
         }
@@ -91,7 +97,7 @@ class TaskRepository(
         val remoteTasks = remoteDataSource.fetchTasks(userRemoteId)
         remoteTasks.forEach { remoteTask ->
             val existing = remoteTask.remoteId?.let { dao.getByRemoteId(it) }
-            val taskForUser = remoteTask.copy(userId = user.id)
+            val taskForUser = remoteTask.copy(userId = user.id, userRemoteId = user.remoteId)
             if (existing == null) {
                 dao.insert(taskForUser)
             } else if (remoteTask.updatedAt >= existing.updatedAt) {
@@ -101,18 +107,25 @@ class TaskRepository(
     }
 
     private suspend fun syncRemote(user: User?, task: Task): Task? {
-        val userRemoteId = user?.remoteId ?: getUserRemoteId(task.userId) ?: return null
-        val remoteId = remoteDataSource.upsertTask(userRemoteId, task)
-        if (remoteId != task.remoteId) {
-            val updatedTask = task.copy(remoteId = remoteId)
+        val userRemoteId = resolveRemoteUserId(user, task) ?: return null
+        val taskWithRemoteUser = if (task.userRemoteId == userRemoteId) task else task.copy(userRemoteId = userRemoteId)
+        val remoteId = remoteDataSource.upsertTask(userRemoteId, taskWithRemoteUser)
+        val needsUpdate = remoteId != task.remoteId || task.userRemoteId != userRemoteId
+        if (needsUpdate) {
+            val updatedTask = taskWithRemoteUser.copy(remoteId = remoteId)
             dao.update(updatedTask)
             return updatedTask
         }
-        return task
+        return taskWithRemoteUser
     }
 
     private suspend fun getUserRemoteId(userId: Long): String? {
         val user = userDao.getById(userId)
         return user?.remoteId
+    }
+
+    private suspend fun resolveRemoteUserId(user: User?, task: Task): String? {
+        val remoteId = user?.remoteId ?: task.userRemoteId ?: getUserRemoteId(task.userId)
+        return remoteId?.takeIf { it.isNotBlank() }
     }
 }

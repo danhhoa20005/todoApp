@@ -44,6 +44,7 @@ class TaskRemoteDataSource(
             Task(
                 id = 0,
                 userId = 0,
+                userRemoteId = data["userId"] as? String,
                 remoteId = doc.id,
                 title = data["title"] as? String ?: "",
                 description = data["description"] as? String ?: "",
