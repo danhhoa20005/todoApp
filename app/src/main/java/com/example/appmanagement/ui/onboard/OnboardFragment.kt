@@ -112,10 +112,14 @@ class OnboardFragment : Fragment() {
 
                 viewModel.loginWithGoogleUser(
                     firebaseUser = firebaseUser,
-                    onSuccess = { user ->
+                    onSuccess = { user, isNewUser ->
                         toast("Xin chào ${user.name}!")
                         taskViewModel.syncTasksForCurrentUser()
-                        findNavController().navigate(R.id.homeFragment)
+                        if (isNewUser) {
+                            findNavController().navigate(R.id.createWorkFragment)
+                        } else {
+                            findNavController().navigate(R.id.homeFragment)
+                        }
                     },
                     onError = {
                         toast("Lỗi lưu tài khoản vào hệ thống!")

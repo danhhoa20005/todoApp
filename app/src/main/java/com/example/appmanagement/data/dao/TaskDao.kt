@@ -12,6 +12,26 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: Task): Long
 
+    // Tìm task trùng tiêu đề + ngày + giờ để chống spam insert
+    @Query(
+        """
+        SELECT * FROM tasks
+        WHERE user_id = :userId
+          AND title = :title
+          AND task_date = :taskDate
+          AND start_time = :startTime
+          AND end_time = :endTime
+        LIMIT 1
+        """
+    )
+    suspend fun findDuplicate(
+        userId: Long,
+        title: String,
+        taskDate: String,
+        startTime: String,
+        endTime: String
+    ): Task?
+
     // ===== READ =====
     @Query("SELECT * FROM tasks WHERE user_id = :userId ORDER BY id DESC")
     fun getByUser(userId: Long): LiveData<List<Task>>

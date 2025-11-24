@@ -9,27 +9,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
-import com.example.appmanagement.data.db.AppDatabase
-import com.example.appmanagement.data.entity.Task
-import com.example.appmanagement.data.repo.AccountRepository
+import com.example.appmanagement.data.viewmodel.TaskViewModel
 import com.example.appmanagement.databinding.FragmentAddBinding
 import com.example.appmanagement.notifications.NotificationScheduler
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Calendar
 
+@AndroidEntryPoint
 class AddFragment : Fragment() {
 
     private var _binding: FragmentAddBinding? = null
     private val binding get() = _binding!!
+
+    private val vm: TaskViewModel by activityViewModels()
+
+    private var isSaving = false
+    private var lastSubmittedForm: TaskForm? = null
 
     private val dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
@@ -53,9 +59,18 @@ class AddFragment : Fragment() {
 
         // lưu
         binding.btnAddTask.setOnClickListener { addTask() }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { vm.isAdding.collect { setSaving(it) } }
+                launch { collectAddResults() }
+            }
+        }
     }
 
     private fun addTask() {
+        if (isSaving) return
+
         val title = binding.edtTitle.text?.toString()?.trim().orEmpty()
         val detail = binding.edtDetail.text?.toString()?.trim().orEmpty()
         val date = binding.edtDate.text?.toString()?.trim().orEmpty()
@@ -114,44 +129,43 @@ class AddFragment : Fragment() {
         if (!ok) return
         // -----------------------------------------
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            val db = AppDatabase.getInstance(requireContext().applicationContext)
-            val currentUser = withContext(Dispatchers.IO) {
-                AccountRepository(db.userDao()).getCurrentUser()
-            }
-            if (currentUser == null) {
-                Toast.makeText(requireContext(), "Chưa có người dùng đăng nhập", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
+        lastSubmittedForm = TaskForm(title, detail, date, start, end, dateObj, startObj)
+        setSaving(true)
+        vm.addTask(title, detail, date, start, end)
+    }
 
-            val task = Task(
-                id = 0L,
-                userId = currentUser.id,
-                title = title,
-                description = detail,   // khớp entity: dùng 'description'
-                isCompleted = false,
-                taskDate = date,
-                startTime = start,
-                endTime = end
-            )
-
-            val insertedId = withContext(Dispatchers.IO) { db.taskDao().insert(task) }
-            if (insertedId > 0) {
-                if (startObj != null && dateObj != null) {
-                    NotificationScheduler.scheduleTaskReminder(
-                        context = requireContext().applicationContext,
-                        taskId = insertedId,
-                        title = title,
-                        date = date,
-                        startTime = start
-                    )
+    private suspend fun collectAddResults() {
+        vm.addResults.collect { result ->
+            result.onSuccess { id ->
+                val form = lastSubmittedForm
+                if (form != null) {
+                    if (form.dateObj != null && form.startObj != null) {
+                        NotificationScheduler.scheduleTaskReminder(
+                            context = requireContext().applicationContext,
+                            taskId = id,
+                            title = form.title,
+                            date = form.date,
+                            startTime = form.start
+                        )
+                    }
+                    Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_addFragment_to_homeFragment)
                 }
-                Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_addFragment_to_homeFragment)
-            } else {
-                Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
+            }.onFailure { t ->
+                Toast.makeText(
+                    requireContext(),
+                    "Thêm thất bại: ${t.message ?: "Lỗi không xác định"}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+            lastSubmittedForm = null
         }
+    }
+
+    private fun setSaving(saving: Boolean) {
+        isSaving = saving
+        binding.btnAddTask.isEnabled = !saving
+        binding.btnAddTask.alpha = if (saving) 0.6f else 1f
     }
 
     private fun showDatePicker() {
@@ -183,4 +197,14 @@ class AddFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    private data class TaskForm(
+        val title: String,
+        val detail: String,
+        val date: String,
+        val start: String,
+        val end: String,
+        val dateObj: LocalDate?,
+        val startObj: LocalTime?
+    )
 }

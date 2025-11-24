@@ -13,7 +13,10 @@ import androidx.room.*
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["user_id"])]
+    indices = [
+        Index(value = ["user_id"]),
+        Index(value = ["user_remote_id"])
+    ]
 )
 data class Task(
 
@@ -22,6 +25,9 @@ data class Task(
 
     @ColumnInfo(name = "user_id")
     val userId: Long,                // id user sở hữu task
+
+    @ColumnInfo(name = "user_remote_id")
+    val userRemoteId: String? = null,// uid Firebase của user để sync Firestore
 
     @ColumnInfo(name = "order_index")
     val orderIndex: Int = 0,         // thứ tự hiển thị

@@ -1,18 +1,24 @@
 // ViewModel TaskViewModel điều phối dữ liệu công việc, lọc theo trạng thái và tính toán thống kê tuần
 package com.example.appmanagement.data.viewmodel
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -50,6 +56,12 @@ class TaskViewModel @Inject constructor(
     private var tasksTodoSource: LiveData<List<Task>>? = null
     private var tasksDoneSource: LiveData<List<Task>>? = null
     private var tasksByDateSource: LiveData<List<Task>>? = null
+
+    private val addMutex = Mutex()
+    private val _isAdding = MutableStateFlow(false)
+    val isAdding = _isAdding.asStateFlow()
+    private val _addResults = MutableSharedFlow<Result<Long>>(extraBufferCapacity = 1)
+    val addResults = _addResults.asSharedFlow()
 
     init {
         loadTasksForCurrentUser()
@@ -105,16 +117,26 @@ class TaskViewModel @Inject constructor(
         _tasksByDate.addSource(source) { _tasksByDate.value = it }
     }
 
-    /** Thêm Task */
+    /** Thêm Task có khóa chống spam + emit kết quả cho UI */
     fun addTask(
         title: String,
         description: String,
         taskDate: String,
         startTime: String,
         endTime: String
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        val user = getCurrentUserSafe() ?: return@launch
-        taskRepository.add(user, title, description, taskDate, startTime, endTime)
+    ) = viewModelScope.launch {
+        if (_isAdding.value) return@launch
+        addMutex.withLock {
+            _isAdding.value = true
+            val result = runCatching {
+                val user = getCurrentUserSafe() ?: error("Chưa có người dùng đăng nhập")
+                withContext(Dispatchers.IO) {
+                    taskRepository.add(user, title, description, taskDate, startTime, endTime)
+                }
+            }
+            _isAdding.value = false
+            _addResults.emit(result)
+        }
     }
 
     /** Cập nhật Task */
