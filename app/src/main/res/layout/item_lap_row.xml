@@ -21,7 +21,7 @@
             android:layout_weight="1"
             android:text="Time 01"
             android:textSize="14sp"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="@color/lapTextSecondary"/>
 
         <TextView
             android:id="@+id/tvLapValue"
@@ -30,12 +30,12 @@
             android:text="00:30.24"
             android:textStyle="bold"
             android:textSize="18sp"
-            android:textColor="?attr/colorOnSurface" />
+            android:textColor="@color/lapTextPrimary"/>
     </LinearLayout>
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?attr/colorOutline" />
+        android:background="@color/lapDivider"/>
 </LinearLayout>

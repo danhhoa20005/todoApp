@@ -4,22 +4,23 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.gms.google-services")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "com.example.appmanagement"
 
-    // compileSdk 36 để dùng được các thư viện AndroidX mới
+    // phải là 36 để satisfy androidx.activity:1.11.0, core-ktx:1.17.0
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.appmanagement"
 
-        // chỉ hỗ trợ từ Android 13 trở lên
+        // bạn đang build cho Android 13+ only, vẫn ok
         minSdk = 33
 
-        // targetSdk 34 để tránh các ràng buộc mới của Android 15
+        // GIỮ targetSdk thấp (34) để:
+        // - tránh bị bắt tuân theo policy 16KB page size của Android 15+
+        // - không dính lại lỗi libsqlcipher.so (mà ta đã gỡ)
         targetSdk = 34
 
         versionCode = 1
@@ -57,7 +58,7 @@ android {
 }
 
 dependencies {
-    // thư viện trong version catalog
+    // Version Catalog deps
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -68,13 +69,17 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // BCrypt để băm mật khẩu/PIN
+    // BCrypt (hash password/PIN -> không native page-size issue)
     implementation("at.favre.lib:bcrypt:0.10.2")
 
-    // EncryptedSharedPreferences cho dữ liệu nhạy cảm nhỏ
+    // ĐÃ GỠ SQLCipher để tránh libsqlcipher.so 16KB warning
+    // implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    // implementation("androidx.sqlite:sqlite:2.4.0")
+
+    // EncryptedSharedPreferences cho data nhạy cảm nhỏ
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // Room (cơ sở dữ liệu cục bộ)
+    // Room (DB local, không mã hóa full-file, không kéo lib native nguy hiểm)
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
@@ -92,27 +97,4 @@ dependencies {
 
     // Glide (load ảnh)
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
-    // Firebase: dùng BoM để đồng bộ phiên bản
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-
-    // Firebase Analytics (tuỳ chọn)
-    implementation("com.google.firebase:firebase-analytics-ktx")
-
-    // Firebase Auth (đăng nhập, có FirebaseUser)
-    implementation("com.google.firebase:firebase-auth-ktx")
-
-    // Firestore (sau này lưu User/Task)
-    implementation("com.google.firebase:firebase-firestore-ktx")
-
-    // Hỗ trợ dùng .await() với Task của Firebase trong coroutine
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
-
-    // Đăng nhập Google (nút Sign in with Google)
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-    // Hilt (Dependency Injection)
-    implementation("com.google.dagger:hilt-android:2.52")
-    kapt("com.google.dagger:hilt-android-compiler:2.52")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
 }

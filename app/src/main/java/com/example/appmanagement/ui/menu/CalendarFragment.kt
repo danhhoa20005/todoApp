@@ -13,10 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
-import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
-import com.google.firebase.firestore.FirebaseFirestore
 import com.example.appmanagement.databinding.FragmentCalendarBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,11 +63,7 @@ class CalendarFragment : Fragment() {
         // Khởi tạo DB + Repo
         val database = AppDatabase.getInstance(requireContext().applicationContext)
         accountRepository = AccountRepository(database.userDao())
-        taskRepository = TaskRepository(
-            database.taskDao(),
-            database.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
-        )
+        taskRepository = TaskRepository(database.taskDao())
 
         // Khởi tạo adapter (đã là working list)
         taskAdapter = TaskAdapter(

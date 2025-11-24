@@ -12,9 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.appmanagement.R
 import com.example.appmanagement.data.viewmodel.SignInViewModel
 import com.example.appmanagement.databinding.FragmentSignUpBinding
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class SignUpFragment : Fragment() {
 
     private var _binding: FragmentSignUpBinding? = null

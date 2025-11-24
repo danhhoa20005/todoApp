@@ -45,6 +45,5 @@
     <color name="lapTextPrimary">#FFFFFFFF</color>
     <color name="lapTextSecondary">#CCFFFFFF</color>
     <color name="lapDivider">#22FFFFFF</color>
-    <color name="iconColor">#ffffff</color>  <!-- Dark: icon màu trắng -->
 
 </resources>

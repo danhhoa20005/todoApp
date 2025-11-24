@@ -57,6 +57,4 @@
     <color name="lapTextSecondary">#CCFFFFFF</color>   <!-- trắng 80% -->
     <color name="lapDivider">#22FFFFFF</color>         <!-- line trắng trong suốt -->
 
-    <color name="iconColor">#000000</color>  <!-- Light: icon màu đen -->
-
 </resources>

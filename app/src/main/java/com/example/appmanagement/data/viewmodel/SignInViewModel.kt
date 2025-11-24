@@ -1,23 +1,22 @@
 // ViewModel SignInViewModel xử lý đăng nhập và đăng ký bằng cách gọi AccountRepository trong coroutine
 package com.example.appmanagement.data.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.appmanagement.data.entity.User
+import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.repo.AccountRepository
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class SignInViewModel @Inject constructor(
-    private val accountRepository: AccountRepository
-) : ViewModel() {
+class SignInViewModel(app: Application) : AndroidViewModel(app) {
+
+    // Data layer
+    private val database by lazy { AppDatabase.getInstance(app) }
+    private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
     // Login result: true = success, false = failure
     private val _loginResult = MutableLiveData<Boolean>()
@@ -27,7 +26,7 @@ class SignInViewModel @Inject constructor(
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> get() = _registerResult
 
-    // login – đăng nhập email + password local
+    /** Login with email & password (repository verifies with BCrypt). */
     fun login(email: String, password: String) {
         val e = email.trim()
         val p = password.trim()
@@ -44,7 +43,7 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    // register – tạo tài khoản local mới
+    /** Register a new user (repository hashes password internally). */
     fun register(name: String, email: String, password: String) {
         val n = name.trim()
         val e = email.trim()
@@ -61,6 +60,7 @@ class SignInViewModel @Inject constructor(
                     accountRepository.register(n, e, p)
                     "ok"
                 } catch (ise: IllegalStateException) {
+                    // From repository: "email_exists" or "invalid_input"
                     when (ise.message) {
                         "email_exists"  -> "email_exists"
                         "invalid_input" -> "invalid"
@@ -71,29 +71,6 @@ class SignInViewModel @Inject constructor(
                 }
             }
             _registerResult.value = result
-        }
-    }
-
-    // loginWithGoogleUser – nhận FirebaseUser – gọi repo.loginWithGoogleAccount – trả User về callback
-    fun loginWithGoogleUser(
-        firebaseUser: FirebaseUser,
-        onSuccess: (User, Boolean) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val result = withContext(Dispatchers.IO) {
-                    accountRepository.loginWithGoogleAccount(
-                        uid = firebaseUser.uid,
-                        email = firebaseUser.email,
-                        name = firebaseUser.displayName,
-                        avatarUrl = firebaseUser.photoUrl?.toString()
-                    )
-                }
-                onSuccess(result.user, result.isNewUser)
-            } catch (e: Throwable) {
-                onError(e)
-            }
         }
     }
 }

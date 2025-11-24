@@ -378,8 +378,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginStart="8dp">
+                    android:layout_marginTop="4dp">
 
                     <TextView style="@style/TextLabelDay" android:text="T2" android:layout_weight="1"/>
                     <TextView style="@style/TextLabelDay" android:text="T3" android:layout_weight="1"/>

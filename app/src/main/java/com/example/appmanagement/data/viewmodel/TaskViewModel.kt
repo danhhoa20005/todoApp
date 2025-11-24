@@ -1,14 +1,14 @@
 // ViewModel TaskViewModel điều phối dữ liệu công việc, lọc theo trạng thái và tính toán thống kê tuần
 package com.example.appmanagement.data.viewmodel
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
-import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,13 +19,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
-@HiltViewModel
-class TaskViewModel @Inject constructor(
-    private val taskRepository: TaskRepository,
-    private val accountRepository: AccountRepository
-) : ViewModel() {
+class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var currentUser: User? = null
+    private val database by lazy { AppDatabase.getInstance(application) }
+    private val taskRepository by lazy { TaskRepository(database.taskDao()) }
+    private val accountRepository by lazy { AccountRepository(database.userDao()) }
+
+    private val currentUserId = MutableLiveData<Long?>()
 
     private val _tasksAll = MediatorLiveData<List<Task>>()
     val tasksAll: LiveData<List<Task>> get() = _tasksAll
@@ -46,62 +46,54 @@ class TaskViewModel @Inject constructor(
     private val _weekPercents = MediatorLiveData<IntArray>()  // [Mon..Sun] 0..100 theo trần 20
     val weekPercents: LiveData<IntArray> get() = _weekPercents
 
-    private var tasksAllSource: LiveData<List<Task>>? = null
-    private var tasksTodoSource: LiveData<List<Task>>? = null
-    private var tasksDoneSource: LiveData<List<Task>>? = null
-    private var tasksByDateSource: LiveData<List<Task>>? = null
-
     init {
-        loadTasksForCurrentUser()
-    }
+        // 1) Nạp user đăng nhập hiện tại
+        loadCurrentUser()
 
-    fun loadTasksForCurrentUser() = viewModelScope.launch {
-        val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
-        currentUser = user
-        attachSources(user)
-    }
-
-    private fun attachSources(user: User?) {
-        tasksAllSource?.let { _tasksAll.removeSource(it) }
-        tasksTodoSource?.let { _tasksTodo.removeSource(it) }
-        tasksDoneSource?.let { _tasksDone.removeSource(it) }
-
-        _tasksAll.value = emptyList()
-        _tasksTodo.value = emptyList()
-        _tasksDone.value = emptyList()
-        computeWeeklySeries(emptyList())
-
-        if (user == null) return
-
-        taskRepository.observeTasksByUserId(user.id).also { source ->
-            tasksAllSource = source
-            _tasksAll.addSource(source) { list ->
-                _tasksAll.value = list
-                computeWeeklySeries(list.orEmpty())
+        // 2) Khi có userId -> gắn nguồn dữ liệu
+        _tasksAll.addSource(currentUserId) { uid ->
+            _tasksAll.value = emptyList()
+            if (uid != null) {
+                val src = taskRepository.all(uid)
+                _tasksAll.addSource(src) { list ->
+                    _tasksAll.value = list
+                    // Mỗi lần all tasks đổi -> cập nhật dữ liệu tuần
+                    computeWeeklySeries(list.orEmpty())
+                }
             }
         }
 
-        taskRepository.uncompleted(user.id).also { source ->
-            tasksTodoSource = source
-            _tasksTodo.addSource(source) { _tasksTodo.value = it }
+        _tasksTodo.addSource(currentUserId) { uid ->
+            _tasksTodo.value = emptyList()
+            if (uid != null) {
+                val src = taskRepository.uncompleted(uid)
+                _tasksTodo.addSource(src) { _tasksTodo.value = it }
+            }
         }
 
-        taskRepository.completed(user.id).also { source ->
-            tasksDoneSource = source
-            _tasksDone.addSource(source) { _tasksDone.value = it }
+        _tasksDone.addSource(currentUserId) { uid ->
+            _tasksDone.value = emptyList()
+            if (uid != null) {
+                val src = taskRepository.completed(uid)
+                _tasksDone.addSource(src) { _tasksDone.value = it }
+            }
         }
+        // _tasksByDate gắn nguồn khi filterByDate(...)
+    }
+
+    private fun loadCurrentUser() = viewModelScope.launch {
+        val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
+        currentUserId.value = user?.id
     }
 
     /** Lọc theo ngày */
     fun filterByDate(date: String) {
-        val user = currentUser ?: run {
+        val uid = currentUserId.value ?: run {
             _tasksByDate.value = emptyList()
             return
         }
         _tasksByDate.value = emptyList()
-        tasksByDateSource?.let { _tasksByDate.removeSource(it) }
-        val source = taskRepository.byDate(user.id, date)
-        tasksByDateSource = source
+        val source = taskRepository.byDate(uid, date)
         _tasksByDate.addSource(source) { _tasksByDate.value = it }
     }
 
@@ -113,8 +105,8 @@ class TaskViewModel @Inject constructor(
         startTime: String,
         endTime: String
     ) = viewModelScope.launch(Dispatchers.IO) {
-        val user = getCurrentUserSafe() ?: return@launch
-        taskRepository.add(user, title, description, taskDate, startTime, endTime)
+        val uid = currentUserId.value ?: return@launch
+        taskRepository.add(uid, title, description, taskDate, startTime, endTime)
     }
 
     /** Cập nhật Task */
@@ -130,11 +122,6 @@ class TaskViewModel @Inject constructor(
     /** Đổi trạng thái hoàn thành */
     fun toggleTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
         taskRepository.toggle(task)
-    }
-
-    fun syncTasksForCurrentUser() = viewModelScope.launch(Dispatchers.IO) {
-        val user = getCurrentUserSafe() ?: return@launch
-        taskRepository.syncFromRemote(user)
     }
 
     // ------------------ WEEKLY CHART HELPERS ------------------
@@ -181,13 +168,5 @@ class TaskViewModel @Inject constructor(
             // if (counts[i] > 0) maxOf(raw, 5) else 0
             (clamped * 100f / capPerDay).roundToInt()
         }
-    }
-
-    suspend fun getCurrentUserSafe(): User? {
-        val cached = currentUser
-        if (cached != null) return cached
-        val refreshed = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
-        currentUser = refreshed
-        return refreshed
     }
 }

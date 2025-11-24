@@ -9,11 +9,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.entity.Task
-import com.example.appmanagement.data.entity.User
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
-import com.example.appmanagement.data.remote.TaskRemoteDataSource
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,16 +18,9 @@ import kotlinx.coroutines.withContext
 class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database by lazy { AppDatabase.getInstance(application) }
-    private val taskRepository by lazy {
-        TaskRepository(
-            database.taskDao(),
-            database.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
-        )
-    }
+    private val taskRepository by lazy { TaskRepository(database.taskDao()) }
     private val accountRepository by lazy { AccountRepository(database.userDao()) }
 
-    private var currentUser: User? = null
     private val currentUserId = MutableLiveData<Long?>()
 
     private val _tasksAll = MediatorLiveData<List<Task>>()
@@ -78,7 +68,6 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadCurrentUser() = viewModelScope.launch {
         val user = withContext(Dispatchers.IO) { accountRepository.getCurrentUser() }
-        currentUser = user
         currentUserId.value = user?.id
     }
 
@@ -101,8 +90,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         startTime: String,
         endTime: String
     ) = viewModelScope.launch(Dispatchers.IO) {
-        val user = currentUser ?: return@launch
-        taskRepository.add(user, title, description, taskDate, startTime, endTime)
+        val uid = currentUserId.value ?: return@launch
+        taskRepository.add(uid, title, description, taskDate, startTime, endTime)
     }
 
     /** Cập nhật Task */
