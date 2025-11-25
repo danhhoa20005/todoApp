@@ -14,6 +14,8 @@ import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.appmanagement.util.NetworkChecker
+import com.example.appmanagement.util.NetworkUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,7 +27,8 @@ class TaskViewModel(application: Application) : AndroidViewModel(application) {
         TaskRepository(
             database.taskDao(),
             database.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
+            TaskRemoteDataSource(FirebaseFirestore.getInstance()),
+            NetworkChecker { NetworkUtils.isOnline(application) }
         )
     }
     private val accountRepository by lazy { AccountRepository(database.userDao()) }

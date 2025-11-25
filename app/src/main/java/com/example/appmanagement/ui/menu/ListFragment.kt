@@ -15,6 +15,8 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import com.example.appmanagement.util.NetworkChecker
+import com.example.appmanagement.util.NetworkUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.appmanagement.databinding.FragmentListBinding
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +52,8 @@ class ListFragment : Fragment() {
         taskRepo = TaskRepository(
             db.taskDao(),
             db.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
+            TaskRemoteDataSource(FirebaseFirestore.getInstance()),
+            NetworkChecker { NetworkUtils.isOnline(appContext) }
         )
 
         taskAdapter = TaskAdapter(

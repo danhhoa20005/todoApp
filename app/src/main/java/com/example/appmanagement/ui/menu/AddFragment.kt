@@ -18,6 +18,8 @@ import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.TaskRepository
 import com.example.appmanagement.databinding.FragmentAddBinding
 import com.example.appmanagement.notifications.NotificationScheduler
+import com.example.appmanagement.util.NetworkChecker
+import com.example.appmanagement.util.NetworkUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -138,7 +140,8 @@ class AddFragment : Fragment() {
                 val taskRepository = TaskRepository(
                     dao = db.taskDao(),
                     userDao = db.userDao(),
-                    remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance())
+                    remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance()),
+                    networkChecker = NetworkChecker { NetworkUtils.isOnline(appContext) }
                 )
 
                 val insertedId = withContext(Dispatchers.IO) {
@@ -167,7 +170,11 @@ class AddFragment : Fragment() {
                     Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
                 }
             } catch (_: Exception) {
-                Toast.makeText(requireContext(), "Không thể thêm công việc khi mất mạng, sẽ thử đồng bộ lại", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Không thể đồng bộ lên server, công việc đã được lưu offline",
+                    Toast.LENGTH_SHORT
+                ).show()
             } finally {
                 isSubmitting = false
                 if (isAdded) {
