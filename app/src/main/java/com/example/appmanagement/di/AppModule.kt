@@ -7,6 +7,8 @@ import com.example.appmanagement.data.db.AppDatabase
 import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import com.example.appmanagement.util.NetworkChecker
+import com.example.appmanagement.util.NetworkUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -41,11 +43,17 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideNetworkChecker(@ApplicationContext context: Context): NetworkChecker =
+        NetworkChecker { NetworkUtils.isOnline(context) }
+
+    @Provides
+    @Singleton
     fun provideTaskRepository(
         taskDao: TaskDao,
         userDao: UserDao,
-        remoteDataSource: TaskRemoteDataSource
-    ): TaskRepository = TaskRepository(taskDao, userDao, remoteDataSource)
+        remoteDataSource: TaskRemoteDataSource,
+        networkChecker: NetworkChecker
+    ): TaskRepository = TaskRepository(taskDao, userDao, remoteDataSource, networkChecker)
 
     @Provides
     @Singleton

@@ -16,6 +16,8 @@ import com.example.appmanagement.data.entity.Task
 import com.example.appmanagement.data.remote.TaskRemoteDataSource
 import com.example.appmanagement.data.repo.AccountRepository
 import com.example.appmanagement.data.repo.TaskRepository
+import com.example.appmanagement.util.NetworkChecker
+import com.example.appmanagement.util.NetworkUtils
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.appmanagement.databinding.FragmentCalendarBinding
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +70,8 @@ class CalendarFragment : Fragment() {
         taskRepository = TaskRepository(
             database.taskDao(),
             database.userDao(),
-            TaskRemoteDataSource(FirebaseFirestore.getInstance())
+            TaskRemoteDataSource(FirebaseFirestore.getInstance()),
+            NetworkChecker { NetworkUtils.isOnline(requireContext().applicationContext) }
         )
 
         // Khởi tạo adapter (đã là working list)
