@@ -41,6 +41,14 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE user_id = :userId AND task_date = :date ORDER BY start_time ASC")
     fun getByDate(userId: Long, date: String): LiveData<List<Task>>
 
+    // Trả về toàn bộ task một lần (dùng cho đồng bộ nền)
+    @Query("SELECT * FROM tasks WHERE user_id = :userId")
+    suspend fun getAllOnce(userId: Long): List<Task>
+
+    // Các task chưa có remote_id để đồng bộ lên server khi có mạng
+    @Query("SELECT * FROM tasks WHERE user_id = :userId AND (remote_id IS NULL OR remote_id = '')")
+    suspend fun getUnsynced(userId: Long): List<Task>
+
     // ===== UPDATE =====   
     @Update
     suspend fun update(task: Task): Int
