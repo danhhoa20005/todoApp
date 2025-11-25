@@ -69,8 +69,7 @@ class TaskRepository(
 
     suspend fun delete(task: Task) {
         dao.delete(task)
-        val userRemoteId = resolveRemoteUserId(null, task)
-        if (!task.remoteId.isNullOrBlank() && !userRemoteId.isNullOrBlank()) {
+        if (!task.remoteId.isNullOrBlank()) {
             remoteDataSource.deleteTask(task.remoteId)
         }
     }
@@ -94,22 +93,40 @@ class TaskRepository(
 
     suspend fun syncFromRemote(user: User) {
         val userRemoteId = user.remoteId ?: return
+
+        // Push mọi thay đổi local (bao gồm task mới tạo offline) lên remote trước
+        pushLocalChanges(user)
+
+        // Sau đó kéo dữ liệu mới nhất từ remote về và hợp nhất theo updatedAt
         val remoteTasks = remoteDataSource.fetchTasks(userRemoteId)
+        if (remoteTasks.isEmpty()) return
+
+        val localTasks = dao.getAllOnce(user.id)
+        val localByRemoteId = localTasks.mapNotNull { task ->
+            task.remoteId?.let { it to task }
+        }.toMap()
+
         remoteTasks.forEach { remoteTask ->
-            val existing = remoteTask.remoteId?.let { dao.getByRemoteId(it) }
+            val existing = localByRemoteId[remoteTask.remoteId]
             val taskForUser = remoteTask.copy(userId = user.id, userRemoteId = user.remoteId)
             if (existing == null) {
                 dao.insert(taskForUser)
-            } else if (remoteTask.updatedAt >= existing.updatedAt) {
+            } else if (remoteTask.updatedAt > existing.updatedAt) {
                 dao.update(taskForUser.copy(id = existing.id))
             }
         }
     }
 
+    private suspend fun pushLocalChanges(user: User) {
+        val userRemoteId = user.remoteId ?: return
+        val localTasks = dao.getAllOnce(user.id)
+        localTasks.forEach { task -> syncRemote(user, task.copy(userRemoteId = task.userRemoteId ?: userRemoteId)) }
+    }
+
     private suspend fun syncRemote(user: User?, task: Task): Task? {
         val userRemoteId = resolveRemoteUserId(user, task) ?: return null
         val taskWithRemoteUser = if (task.userRemoteId == userRemoteId) task else task.copy(userRemoteId = userRemoteId)
-        val remoteId = remoteDataSource.upsertTask(userRemoteId, taskWithRemoteUser)
+        val remoteId = remoteDataSource.upsertTask(userRemoteId, taskWithRemoteUser) ?: return null
         val needsUpdate = remoteId != task.remoteId || task.userRemoteId != userRemoteId
         if (needsUpdate) {
             val updatedTask = taskWithRemoteUser.copy(remoteId = remoteId)

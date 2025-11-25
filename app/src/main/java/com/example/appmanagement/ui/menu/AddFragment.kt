@@ -33,6 +33,8 @@ class AddFragment : Fragment() {
     private var _binding: FragmentAddBinding? = null
     private val binding get() = _binding!!
 
+    private var isSubmitting = false
+
     private val dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -58,6 +60,8 @@ class AddFragment : Fragment() {
     }
 
     private fun addTask() {
+        if (isSubmitting) return
+
         val title = binding.edtTitle.text?.toString()?.trim().orEmpty()
         val detail = binding.edtDetail.text?.toString()?.trim().orEmpty()
         val date = binding.edtDate.text?.toString()?.trim().orEmpty()
@@ -116,49 +120,65 @@ class AddFragment : Fragment() {
         if (!ok) return
         // -----------------------------------------
 
+        isSubmitting = true
+        setButtonEnabled(false)
+
         viewLifecycleOwner.lifecycleScope.launch {
-            val appContext = requireContext().applicationContext
-            val db = AppDatabase.getInstance(appContext)
-            val currentUser = withContext(Dispatchers.IO) {
-                AccountRepository(db.userDao()).getCurrentUser()
-            }
-            if (currentUser == null) {
-                Toast.makeText(requireContext(), "Chưa có người dùng đăng nhập", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
+            try {
+                val appContext = requireContext().applicationContext
+                val db = AppDatabase.getInstance(appContext)
+                val currentUser = withContext(Dispatchers.IO) {
+                    AccountRepository(db.userDao()).getCurrentUser()
+                }
+                if (currentUser == null) {
+                    Toast.makeText(requireContext(), "Chưa có người dùng đăng nhập", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
 
-            val taskRepository = TaskRepository(
-                dao = db.taskDao(),
-                userDao = db.userDao(),
-                remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance())
-            )
-
-            val insertedId = withContext(Dispatchers.IO) {
-                taskRepository.add(
-                    user = currentUser,
-                    title = title,
-                    description = detail,
-                    taskDate = date,
-                    startTime = start,
-                    endTime = end
+                val taskRepository = TaskRepository(
+                    dao = db.taskDao(),
+                    userDao = db.userDao(),
+                    remoteDataSource = TaskRemoteDataSource(FirebaseFirestore.getInstance())
                 )
-            }
-            if (insertedId > 0) {
-                if (startObj != null && dateObj != null) {
-                    NotificationScheduler.scheduleTaskReminder(
-                        context = appContext,
-                        taskId = insertedId,
+
+                val insertedId = withContext(Dispatchers.IO) {
+                    taskRepository.add(
+                        user = currentUser,
                         title = title,
-                        date = date,
-                        startTime = start
+                        description = detail,
+                        taskDate = date,
+                        startTime = start,
+                        endTime = end
                     )
                 }
-                Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_addFragment_to_homeFragment)
-            } else {
-                Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                if (insertedId > 0) {
+                    if (startObj != null && dateObj != null) {
+                        NotificationScheduler.scheduleTaskReminder(
+                            context = appContext,
+                            taskId = insertedId,
+                            title = title,
+                            date = date,
+                            startTime = start
+                        )
+                    }
+                    Toast.makeText(requireContext(), "Đã thêm công việc", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_addFragment_to_homeFragment)
+                } else {
+                    Toast.makeText(requireContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show()
+                }
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "Không thể thêm công việc khi mất mạng, sẽ thử đồng bộ lại", Toast.LENGTH_SHORT).show()
+            } finally {
+                isSubmitting = false
+                if (isAdded) {
+                    setButtonEnabled(true)
+                }
             }
         }
+    }
+
+    private fun setButtonEnabled(enabled: Boolean) {
+        binding.btnAddTask.isEnabled = enabled
     }
 
     private fun showDatePicker() {
